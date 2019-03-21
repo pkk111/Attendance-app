@@ -4,6 +4,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.IntentFilter;
 import android.net.wifi.p2p.WifiP2pManager;
+import android.os.Looper;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.widget.TextView;
@@ -20,6 +21,7 @@ import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.net.Inet4Address;
 import java.net.Socket;
+
 
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener{
@@ -60,20 +62,21 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 try {
                     //Replace below IP with the IP of that device in which server socket open.
                     //If you change port then change the port number in the server side code also.
-                    Toast.makeText(getApplicationContext(),"Device Pairing starting",Toast.LENGTH_SHORT);
+
+                    toast("Device Pairing starting");
                     Socket s = new Socket(Inet4Address.getLocalHost().getHostAddress(), 9002);
-                    Toast.makeText(getApplicationContext(),"Socket is success",Toast.LENGTH_SHORT).show();
+                    toast("Socket is success");
 
                     OutputStream out = s.getOutputStream();
-                    Toast.makeText(getApplicationContext(),"OutputStream is success",Toast.LENGTH_SHORT).show();
+                    toast("OutputStream is success");
 
                     PrintWriter output = new PrintWriter(out);
-                    Toast.makeText(getApplicationContext(),"PrintWriter is success",Toast.LENGTH_SHORT).show();
+                    toast("PrintWriter is success");
 
                     output.println(msg);
                     output.flush();
 
-                    Toast.makeText(getApplicationContext(),"Message is send",Toast.LENGTH_SHORT).show();
+                    toast("Message is send");
                     //BufferedReader input = new BufferedReader(new InputStreamReader(s.getInputStream()));
                     //final String st = input.readLine();
 
@@ -84,6 +87,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                             String s = mTextViewReplyFromServer.getText().toString();
                             //if (st.trim().length() != 0)
                                 mTextViewReplyFromServer.setText(s + "\n From Server : "/* + st*/);
+
                         }
                     });
 
@@ -97,5 +101,17 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         });
 
         thread.start();
+    }
+
+    public void toast(final String message) {
+        Handler handler = new Handler(Looper.getMainLooper());
+
+        handler.post(new Runnable() {
+
+            @Override
+            public void run() {
+                Toast.makeText(getApplicationContext(), message, Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 }
