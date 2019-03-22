@@ -28,9 +28,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        buttonStartReceiving = (Button) findViewById(R.id.btn_start_receiving);
-        buttonStopReceiving = (Button) findViewById(R.id.btn_stop_receiving);
-        textViewDataFromClient = (TextView) findViewById(R.id.tv_data_from_client);
+        buttonStartReceiving = findViewById(R.id.btn_start_receiving);
+        buttonStopReceiving = findViewById(R.id.btn_stop_receiving);
+        textViewDataFromClient = findViewById(R.id.clientmess);
 
         buttonStartReceiving.setOnClickListener(this);
         buttonStopReceiving.setOnClickListener(this);
@@ -46,10 +46,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             public void run() {
 
                 try {
+                    if(!end){
 
                     ServerSocket ss = new ServerSocket(9002);
 
-                    while (!end) {
+                    while (end) {
                         //Server is waiting for client here, if needed
                         Socket s = ss.accept();
                         BufferedReader input = new BufferedReader(new InputStreamReader(s.getInputStream()));
@@ -60,7 +61,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         output.flush();
 
                         try {
-                            Thread.sleep(1000);
+                            Thread.sleep(100);
                         } catch (InterruptedException e) {
                             e.printStackTrace();
                         }
@@ -71,11 +72,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                             s.close();
                             break;
                         }
-
                         output.close();
                         s.close();
                     }
                     ss.close();
+                }
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
@@ -107,6 +108,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 startServerSocket();
                 buttonStartReceiving.setEnabled(false);
                 buttonStopReceiving.setEnabled(true);
+                end=true;
                 break;
 
             case R.id.btn_stop_receiving:
@@ -114,6 +116,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 //stopping server socket logic you can add yourself
                 buttonStartReceiving.setEnabled(true);
                 buttonStopReceiving.setEnabled(false);
+                end=false;
                 break;
         }
     }
