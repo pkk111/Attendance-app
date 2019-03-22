@@ -13,7 +13,7 @@
         android:layout_alignParentTop="true"
         android:enabled="false"
         android:layout_centerHorizontal="true"
-        android:layout_marginTop="89dp" />
+        android:layout_marginTop="70dp" />
 
     <Button
         android:id="@+id/btn_start_receiving"
@@ -40,11 +40,23 @@
             android:orientation="vertical" />
     </ScrollView>
 
+    <Button
+        android:layout_height="wrap_content"
+        android:layout_width="wrap_content"
+        android:layout_below="@id/scroolview"
+        android:id="@+id/Refresh"
+        android:textStyle="normal"
+        android:text="REFRESH"
+        android:fontFamily="sans-serif"
+        android:layout_centerHorizontal="true"
+        />
+
     <android.support.v7.widget.RecyclerView
         android:id="@+id/recycler_view"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_below="@+id/scroolview">
+        android:layout_below="@+id/Refresh"
+        android:layout_marginTop="15dp">
 
     </android.support.v7.widget.RecyclerView>
 

@@ -2,19 +2,19 @@ package com.pkk.andriod.attendence;
 
 public class MessageExtractor {
 
-    private int noofstud;
-    private String[] studip;
-    private Boolean[] stud;
-    private int rollno[];
+    private static int noofstud;
+    private static String[] studip;
+    private static Boolean[] stud;
+    private static int rollno[];
 
-    void MessageExtractor(int l){
+      MessageExtractor(int l){
         this.noofstud = l;
-      stud = new Boolean[l];
-      studip = new String[l];
-      rollno = new int[l];
+        stud = new Boolean[l];
+        studip = new String[l];
+        rollno = new int[l];
     }
 
-    void update(int rollno,String ip,Boolean present){
+    static void update(int rollno,String ip,Boolean present){
         Boolean check=false;
         for(int x=0;x<noofstud;x++){
             if(studip!=null)
@@ -29,7 +29,26 @@ public class MessageExtractor {
         }
     }
 
-    Boolean[] requestattendence(){
+    static int[] getattendence(){
+        return rollno;
+    }
+
+    static int getstud(){return noofstud;}
+
+    static Boolean[] getstatus(){
         return stud;
     }
+
+    static int getcolor(Boolean bool){
+        if(bool)
+            return 4;
+        return 5;
+    }
+
+    static String getattendence(Boolean bool){
+        if(bool)
+            return "Present";
+        return "Absent";
+    }
+
 }
