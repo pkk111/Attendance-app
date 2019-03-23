@@ -6,7 +6,8 @@
     <android.support.v7.widget.CardView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        appNs:cardElevation="5dp"
+        appNs:cardElevation="10dp"
+        android:layout_margin="5dp"
         android:id="@+id/notification_background"
         appNs:cardBackgroundColor="@color/colorPrimary"
         appNs:cardCornerRadius="15dp">

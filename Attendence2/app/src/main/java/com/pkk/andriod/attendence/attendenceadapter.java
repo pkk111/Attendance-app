@@ -8,20 +8,23 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
+import android.widget.Toast;
 
 public class attendenceadapter extends RecyclerView.Adapter<attendenceadapter.MyViewHolder> {
 
-    private int[] roll;
+    public  int[] roll;
     private Boolean[] att;
     private static LayoutInflater layoutinflator;
 
-    public attendenceadapter(int[] students,Boolean[] attendence){
-        this.roll=students;
-        this.att=attendence;
+    public attendenceadapter(Context context){
+
+        layoutinflator=LayoutInflater.from(context);
+
     }
 
-    public static void setContext(Context context){
-        layoutinflator=LayoutInflater.from(context);
+    public  void setattendence(int[] roll,Boolean[] att){
+        this.roll=roll;
+        this.att=att;
     }
 
     @NonNull
@@ -33,9 +36,9 @@ public class attendenceadapter extends RecyclerView.Adapter<attendenceadapter.My
 
     @Override
     public void onBindViewHolder(@NonNull MyViewHolder myViewHolder, int i) {
-        myViewHolder.background.setCardBackgroundColor(MessageExtractor.getcolor(att[i]));
+        //myViewHolder.background.setCardBackgroundColor(MessageExtractor.getcolor(att[i]));
         myViewHolder.rollno.setText(roll[i]);
-        myViewHolder.status.setText(MessageExtractor.getattendence(att[i]));
+        //myViewHolder.status.setText(MessageExtractor.getattendence(att[i]));
     }
 
     @Override

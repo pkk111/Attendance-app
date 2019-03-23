@@ -4,6 +4,7 @@ import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Looper;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.LinearLayoutManager;
@@ -13,6 +14,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -32,13 +34,16 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private TextView textViewDataFromClient;
 
     private RecyclerView recyclerView;
-    private RecyclerView.Adapter madapter;
+    private attendenceadapter madapter;
     private TextView rollno;
     private CardView cardview;
     private boolean end = false;
     private boolean check=false;
-    MessageExtractor me;
-    String ip="";
+    private boolean check2=true;
+    private boolean check3=true;
+    private MessageExtractor me;
+    private String ip="";
+    private String noofstud="";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -46,11 +51,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         setContentView(R.layout.activity_main);
 
         initalize();
+        madapter = new attendenceadapter(this);
 
         buttonStartReceiving.setOnClickListener(this);
         buttonStopReceiving.setOnClickListener(this);
-
-        setRecyclerView();
     }
 
     private void startServerSocket() {
@@ -103,6 +107,18 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         thread.start();
     }
 
+    public void toast(final String message) {
+        Handler handler = new Handler(Looper.getMainLooper());
+
+        handler.post(new Runnable() {
+
+            @Override
+            public void run() {
+                Toast.makeText(getApplicationContext(), message, Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
     private void initalize(){
         buttonStartReceiving = findViewById(R.id.btn_start_receiving);
         buttonStopReceiving = findViewById(R.id.btn_stop_receiving);
@@ -113,11 +129,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     private void setRecyclerView(){
-        recyclerView.setHasFixedSize(true);
-        recyclerView.setLayoutManager(new LinearLayoutManager(this));
-        madapter=new attendenceadapter(me.getattendence(),me.getstatus());
-        attendenceadapter.setContext(this);
         recyclerView.setAdapter(madapter);
+        recyclerView.setLayoutManager(new LinearLayoutManager(this));
+        madapter.setattendence(me.getattendence(),me.getstatus());
+        madapter.notifyDataSetChanged();
     }
 
     private void updateUI(final String stringdata) {
@@ -170,24 +185,41 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         switch (v.getId()) {
             case R.id.btn_start_receiving:
-                AlertDialog.Builder builder = new AlertDialog.Builder(this);
-                builder.setTitle("Title");
+                noofstud="";
+                check=false;
+                AlertDialog.Builder builder =new AlertDialog.Builder(this);
+                builder.setTitle("Total no of Students?");
 
                 // Set up the input
                 final EditText input = new EditText(this);
                 // Specify the type of input expected; this, for example, sets the input as a password, and will mask the text
-                input.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD);
+                input.setInputType(InputType.TYPE_CLASS_TEXT);
                 builder.setView(input);
 
                 // Set up the buttons
                 builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        String noofstud=input.getText().toString().trim();
+                        if(check3){
+                        noofstud=input.getText().toString().trim();
                         if(!noofstud.isEmpty()){
                             check=true;
-                            me=new MessageExtractor(Integer.parseInt(noofstud));}
-                    }
+                            check2=true;
+                            try{int noroll=Integer.parseInt(noofstud);}
+                            catch (Exception e){
+                                toast("Enter number of student correctly");
+                                check2=false;
+                            }}
+                        if(check && check2){
+                            me=new MessageExtractor(Integer.parseInt(noofstud));
+                            startServerSocket();
+                            setRecyclerView();
+                            buttonStartReceiving.setEnabled(false);
+                            buttonStopReceiving.setEnabled(true);
+                            end=true;
+                            check=false;
+                            check3=false;}
+                    }}
                 });
                 builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
                     @Override
@@ -197,11 +229,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 });
 
                 builder.show();
-                if(check){
-                startServerSocket();
-                buttonStartReceiving.setEnabled(false);
-                buttonStopReceiving.setEnabled(true);
-                end=true;}
                 break;
 
             case R.id.btn_stop_receiving:
