@@ -18,20 +18,20 @@
         android:layout_margin="10dp"
         android:orientation="vertical"
         android:textAlignment="center"
-        android:padding="16dp">
+        android:padding="12dp">
         <TextView
             android:layout_height="wrap_content"
             android:layout_width="wrap_content"
             android:textStyle="bold"
             android:id="@+id/rollno"
-            android:textSize="32sp"
-            android:text="Roll No."
+            android:textSize="24sp"
+            android:text="@string/rollnumber"
             android:layout_marginBottom="5dp"/>
         <TextView
             android:layout_height="wrap_content"
             android:layout_width="wrap_content"
-            android:textSize="30dp"
-            android:text="Status"
+            android:textSize="20dp"
+            android:text="@string/attendencestatus"
             android:id="@+id/status"
             android:textStyle="italic"/>
 

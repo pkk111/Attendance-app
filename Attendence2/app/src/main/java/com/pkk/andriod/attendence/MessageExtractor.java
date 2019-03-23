@@ -1,5 +1,8 @@
 package com.pkk.andriod.attendence;
 
+import android.content.res.ColorStateList;
+import android.graphics.Color;
+
 public class MessageExtractor {
 
     private static int noofstud;
@@ -46,8 +49,8 @@ public class MessageExtractor {
 
     static int getcolor(Boolean bool){
         if(bool)
-            return 6609990;
-        return 16716850;
+            return Color.rgb(50,205,50);
+        return Color.rgb(220,20,60);
     }
 
     static String getattendence(Boolean bool){

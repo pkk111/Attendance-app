@@ -29,7 +29,7 @@
         android:layout_height="wrap_content"
         android:layout_below="@+id/btn_stop_receiving"
         android:id="@+id/scroolview"
-        android:layout_margin="35dp"
+        android:layout_margin="20dp"
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true">
 

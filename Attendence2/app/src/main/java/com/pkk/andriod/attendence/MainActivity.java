@@ -216,9 +216,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                             setRecyclerView();
                             buttonStartReceiving.setEnabled(false);
                             buttonStopReceiving.setEnabled(true);
-                            end=true;
-                            check=false;
-                            check3=false;}
+                            end=true;}
                     }}
                 });
                 builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
@@ -234,6 +232,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             case R.id.btn_stop_receiving:
 
                 //stopping server socket logic you can add yourself
+                check3=true;
                 buttonStartReceiving.setEnabled(true);
                 buttonStopReceiving.setEnabled(false);
                 end=false;
