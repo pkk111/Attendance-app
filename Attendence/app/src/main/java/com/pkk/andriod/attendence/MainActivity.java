@@ -92,9 +92,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                                 sendMessage(message);
 
                             }
-                            else
-                                toast("Enter Roll No to mark your attendence");
                         }
+                        else
+                            toast("Enter Roll No to mark your attendence");
+
                     }
                 });
                 builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
