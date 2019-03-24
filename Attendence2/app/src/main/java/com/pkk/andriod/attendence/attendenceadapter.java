@@ -35,7 +35,7 @@ public class attendenceadapter extends RecyclerView.Adapter<attendenceadapter.My
     @Override
     public void onBindViewHolder(@NonNull MyViewHolder myViewHolder, int i) {
         myViewHolder.background.setCardBackgroundColor(MessageExtractor.getcolor(att[i]));
-        myViewHolder.rollno.setText("Roll No."+roll[i]);
+        myViewHolder.rollno.setText("Roll No. "+roll[i]);
         myViewHolder.status.setText(MessageExtractor.getattendence(att[i]));
     }
 

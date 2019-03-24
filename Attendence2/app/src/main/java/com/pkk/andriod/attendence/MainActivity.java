@@ -31,18 +31,22 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     private Button buttonStartReceiving;
     private Button buttonStopReceiving;
+    private Button refresh;
     private TextView textViewDataFromClient;
 
     private RecyclerView recyclerView;
     private attendenceadapter madapter;
     private TextView rollno;
     private CardView cardview;
-    private boolean end = false;
+    private boolean end = true;
     private boolean check=false;
     private boolean check2=true;
     private boolean check3=true;
+    private boolean checker=false;
     private MessageExtractor me;
     private String ip="";
+    private int x=0;
+    static String output="";
     private String noofstud="";
 
     @Override
@@ -55,6 +59,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         buttonStartReceiving.setOnClickListener(this);
         buttonStopReceiving.setOnClickListener(this);
+        refresh.setOnClickListener(this);
+        refresh.setEnabled(false);
     }
 
     private void startServerSocket() {
@@ -67,10 +73,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             public void run() {
 
                 try {
-                    if(!end){
+                    if(end){
 
                     ServerSocket ss = new ServerSocket(9002);
-
                     while (end) {
                         //Server is waiting for client here, if needed
                         Socket s = ss.accept();
@@ -78,21 +83,20 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         PrintWriter output = new PrintWriter(s.getOutputStream());
 
                         stringData = input.readLine();
-                        output.println("FROM SERVER - " + stringData.toUpperCase());
-                        output.flush();
-
+                        String message=updateUI(stringData);
                         try {
                             Thread.sleep(100);
                         } catch (InterruptedException e) {
                             e.printStackTrace();
                         }
-                        updateUI(stringData);
                         if (stringData.equalsIgnoreCase("STOP")) {
                             end = true;
                             output.close();
                             s.close();
                             break;
                         }
+                        output.println(message);
+                        output.flush();
                         output.close();
                         s.close();
                     }
@@ -114,7 +118,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
             @Override
             public void run() {
-                Toast.makeText(getApplicationContext(), message, Toast.LENGTH_SHORT).show();
+                Toast.makeText(getApplicationContext(), message, Toast.LENGTH_LONG).show();
             }
         });
     }
@@ -122,6 +126,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private void initalize(){
         buttonStartReceiving = findViewById(R.id.btn_start_receiving);
         buttonStopReceiving = findViewById(R.id.btn_stop_receiving);
+        refresh = findViewById(R.id.Refresh);
         textViewDataFromClient = findViewById(R.id.clientmess);
         recyclerView = findViewById(R.id.recycler_view);
         rollno = findViewById(R.id.rollno);
@@ -135,49 +140,76 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         madapter.notifyDataSetChanged();
     }
 
-    private void updateUI(final String stringdata) {
+    private String updateUI(final String stringdata) {
 
         handler.post(new Runnable() {
             @Override
             public void run() {
                 int l=stringdata.length();
+                 checker=true;
                 if(l>15){
                     if(ipcheck(stringdata))
-                    try {
+                    {try {
                         ip=stringdata.substring(0,15);
                         InetAddress ipadd=InetAddress.getByName(ip);
                         ip=ipadd.toString();
                     } catch (UnknownHostException e) {
                         e.printStackTrace();
+                        toast("Error name: "+e);
                     }
-                    me.update(rollno(stringdata),ip,status(stringdata));
-
+                    if(rollno(stringdata)<=me.getstud()){
+                        checker=false;
+                        me.update(rollno(stringdata),ip,status(stringdata));
+                        setRecyclerView();
+                        if(me.getstatus()[rollno(stringdata)-1]){
+                            output="true";
+                        }
+                    }
+                    }
                 }
-                String s = textViewDataFromClient.getText().toString();
-                if (stringdata.trim().length() != 0)
-                    textViewDataFromClient.setText(s + "\n" + "From Client : " + stringdata);
+                if(checker){
+                    String s = textViewDataFromClient.getText().toString();
+                    if (stringdata.trim().length() != 0)
+                        textViewDataFromClient.setText(s + "\n" + "From Client : " + stringdata);
+                    output="FROM SERVER - " + stringdata.toUpperCase();
+                    checker=false;}
             }
         });
+        if(!checker) {
+            try {
+                Thread.sleep(100);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+        return output;
     }
 
     boolean ipcheck(String s){
         Character c1=s.charAt(3);
-        Character c2=s.charAt(6);
-        Character c3=s.charAt(9);
+        Character c2=s.charAt(7);
+        Character c3=s.charAt(11);
         if(c1.equals('.') && c2.equals('.') && c3.equals('.'))
             return true;
         return false;
     }
 
     boolean status(String s){
-        int n1=((int)Math.log(me.getstud()))+1+16+1;
-        if(s.substring(n1).equals("true"))
+
+        if(s.substring(x+1).equals("true"))
             return true;
         return false;
     }
 
     int rollno(String s){
-        return Integer.parseInt(s.substring(16));
+        x=16;
+        while(x<s.length()){
+            char c=s.charAt(x);
+            if(c==' ')
+                break;
+            x++;
+        }
+        return Integer.parseInt(s.substring(16,x));
     }
 
     @Override
@@ -185,7 +217,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         switch (v.getId()) {
             case R.id.btn_start_receiving:
-                noofstud="";
+            {noofstud="";
                 check=false;
                 AlertDialog.Builder builder =new AlertDialog.Builder(this);
                 builder.setTitle("Total no of Students?");
@@ -216,6 +248,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                             setRecyclerView();
                             buttonStartReceiving.setEnabled(false);
                             buttonStopReceiving.setEnabled(true);
+                            refresh.setEnabled(true);
                             end=true;}
                     }}
                 });
@@ -228,18 +261,21 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
                 builder.show();
                 break;
-
+            }
             case R.id.btn_stop_receiving:
-
+                {
                 //stopping server socket logic you can add yourself
                 check3=true;
                 buttonStartReceiving.setEnabled(true);
                 buttonStopReceiving.setEnabled(false);
                 end=false;
                 break;
+                }
             case R.id.Refresh:
-                setRecyclerView();
-                break;
+                {
+                    setRecyclerView();
+                    break;
+                }
         }
     }
 }

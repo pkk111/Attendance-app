@@ -27,11 +27,13 @@ public class MessageExtractor {
         for(int x=0;x<noofstud;x++){
             if(studip!=null)
                 if(studip[x].equals(ip)){
+                    MainActivity.output="You cannot mark more than one attendence";
                     check=false;
                     break;
                 }
         }
         if(check){
+            --rollno;
             studip[rollno]=ip;
             stud[rollno]=present;
         }
