@@ -29,25 +29,24 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     final Handler handler = new Handler();
 
-    private Button buttonStartReceiving;
-    private Button buttonStopReceiving;
+    private Button buttonReceiving;
     private Button refresh;
     private TextView textViewDataFromClient;
 
     private RecyclerView recyclerView;
     private attendenceadapter madapter;
-    private TextView rollno;
-    private CardView cardview;
     private boolean end = true;
     private boolean check=false;
     private boolean check2=true;
     private boolean check3=true;
+    private boolean check4=true;
     private boolean checker=false;
     private MessageExtractor me;
     private String ip="";
     private int x=0;
     static String output="";
     private String noofstud="";
+    private Thread thread;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -57,15 +56,14 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         initalize();
         madapter = new attendenceadapter(this);
 
-        buttonStartReceiving.setOnClickListener(this);
-        buttonStopReceiving.setOnClickListener(this);
+        buttonReceiving.setOnClickListener(this);
         refresh.setOnClickListener(this);
         refresh.setEnabled(false);
     }
 
     private void startServerSocket() {
 
-        Thread thread = new Thread(new Runnable() {
+         thread = new Thread(new Runnable() {
 
             private String stringData = null;
 
@@ -73,7 +71,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             public void run() {
 
                 try {
-                    if(end){
 
                     ServerSocket ss = new ServerSocket(9002);
                     while (end) {
@@ -93,6 +90,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                             end = true;
                             output.close();
                             s.close();
+                            check3=true;
+                            check4=true;
+                            thread.stop();
+                            buttonReceiving.setText("Start Reciving data");
                             break;
                         }
                         output.println(message);
@@ -101,7 +102,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         s.close();
                     }
                     ss.close();
-                }
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
@@ -124,13 +124,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     private void initalize(){
-        buttonStartReceiving = findViewById(R.id.btn_start_receiving);
-        buttonStopReceiving = findViewById(R.id.btn_stop_receiving);
+        buttonReceiving = findViewById(R.id.btn_receiving);
         refresh = findViewById(R.id.Refresh);
         textViewDataFromClient = findViewById(R.id.clientmess);
         recyclerView = findViewById(R.id.recycler_view);
-        rollno = findViewById(R.id.rollno);
-        cardview = findViewById(R.id.notification_background);
     }
 
     private void setRecyclerView(){
@@ -216,8 +213,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     public void onClick(View v) {
 
         switch (v.getId()) {
-            case R.id.btn_start_receiving:
-            {noofstud="";
+            case R.id.btn_receiving:
+                if(check4){
+                check4=false;
+                noofstud="";
                 check=false;
                 AlertDialog.Builder builder =new AlertDialog.Builder(this);
                 builder.setTitle("Total no of Students?");
@@ -225,7 +224,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 // Set up the input
                 final EditText input = new EditText(this);
                 // Specify the type of input expected; this, for example, sets the input as a password, and will mask the text
-                input.setInputType(InputType.TYPE_CLASS_TEXT);
+                input.setInputType(InputType.TYPE_CLASS_NUMBER);
                 builder.setView(input);
 
                 // Set up the buttons
@@ -237,19 +236,14 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         if(!noofstud.isEmpty()){
                             check=true;
                             check2=true;
-                            try{int noroll=Integer.parseInt(noofstud);}
-                            catch (Exception e){
                                 toast("Enter number of student correctly");
                                 check2=false;
-                            }}
+                            }
                         if(check && check2){
                             me=new MessageExtractor(Integer.parseInt(noofstud));
                             startServerSocket();
-                            setRecyclerView();
-                            buttonStartReceiving.setEnabled(false);
-                            buttonStopReceiving.setEnabled(true);
-                            refresh.setEnabled(true);
-                            end=true;}
+                            buttonReceiving.setText("STOP Reciving data");
+                            refresh.setEnabled(true);}
                     }}
                 });
                 builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
@@ -261,21 +255,16 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
                 builder.show();
                 break;
-            }
-            case R.id.btn_stop_receiving:
-                {
-                //stopping server socket logic you can add yourself
+                }
+                else{
                 check3=true;
-                buttonStartReceiving.setEnabled(true);
-                buttonStopReceiving.setEnabled(false);
-                end=false;
-                break;
-                }
+                check4=true;
+                thread.stop();
+                buttonReceiving.setText("Start Reciving data");
+                break;}
             case R.id.Refresh:
-                {
-                    setRecyclerView();
-                    break;
-                }
+                madapter.notifyDataSetChanged();
+                break;
         }
     }
 }
