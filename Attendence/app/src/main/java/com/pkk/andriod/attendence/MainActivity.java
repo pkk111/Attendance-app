@@ -1,13 +1,8 @@
 package com.pkk.andriod.attendence;
 
 import android.app.AlertDialog;
-import android.content.BroadcastReceiver;
-import android.content.Context;
 import android.content.DialogInterface;
-import android.content.IntentFilter;
-import android.graphics.Color;
 import android.net.wifi.WifiManager;
-import android.net.wifi.p2p.WifiP2pManager;
 import android.os.Looper;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -25,10 +20,8 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.PrintWriter;
-import java.net.Inet4Address;
 import java.net.InetAddress;
 import java.net.Socket;
-import java.net.UnknownHostException;
 
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener{
@@ -45,14 +38,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        Button buttonSend =findViewById(R.id.btn_send);
-
-        mEditTextSendMessage = findViewById(R.id.edt_send_message);
-        mTextViewReplyFromServer = findViewById(R.id.tv_reply_from_server);
         status = findViewById(R.id.status);
-        status.setBackgroundColor(Color.rgb(220,20,60));
 
-        buttonSend.setOnClickListener(this);
         status.setOnClickListener(this);
     }
    @Override
@@ -60,53 +47,49 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         switch (v.getId()) {
 
-            case R.id.btn_send:
-                sendMessage(mEditTextSendMessage.getText().toString());
-                break;
             case R.id.status:
-                AlertDialog.Builder builder = new AlertDialog.Builder(this);
-                builder.setTitle("Enter Your Roll No");
-
-                // Set up the input
-                final EditText input = new EditText(this);
-                // Specify the type of input expected; this, for example, sets the input as a password, and will mask the text
-                input.setInputType(InputType.TYPE_CLASS_TEXT);
-                builder.setView(input);
-
-                // Set up the buttons
-                builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                wm = (WifiManager) getApplicationContext().getSystemService(WIFI_SERVICE);
+                if(wm.isWifiEnabled()) {
+                    AlertDialog.Builder builder = new AlertDialog.Builder(this);
+                    builder.setTitle("Enter Your Roll No");
+                    // Set up the input
+                    final EditText input = new EditText(this);
+                    // Specify the type of input expected; this, for example, sets the input as a password, and will mask the text
+                    input.setInputType(InputType.TYPE_CLASS_NUMBER);
+                    builder.setView(input);
+                    // Set up the buttons
+                    builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         rollno = input.getText().toString();
-
                         if(!rollno.isEmpty())
-                        {try{int roll=Integer.parseInt(rollno);}
-                         catch (Exception e)
-                         {check=false;
-                         toast("Enter Roll No correctly");}
+                        {
+                        check=false;
+                         toast("Enter Roll No correctly");
                             if(check){
-                                WifiManager wm = (WifiManager) getApplicationContext().getSystemService(WIFI_SERVICE);
-                                String message = Formatter.formatIpAddress(wm.getConnectionInfo().getIpAddress());
-                                message=iphandeler(message);
-                                message+=" "+rollno+" true";
-                                sendMessage(message);
 
+                                    String message = Formatter.formatIpAddress(wm.getConnectionInfo().getIpAddress());
+                                    message = iphandeler(message);
+                                    message += " " + rollno + " true";
+                                    sendMessage(message);
                             }
                         }
                         else
                             toast("Enter Roll No to mark your attendence");
 
+                        }
+                    });
+                    builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                       @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            dialog.cancel();
+                      }
+                    });
+                    builder.show();
                     }
-                });
-                builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        dialog.cancel();
-                    }
-                });
-
-                builder.show();
-        }
+                    else
+                    toast("Please turn on wifi and try again.");
+         }
     }
 
     String iphandeler(String ip){
@@ -141,7 +124,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     //Replace below IP with the IP of that device in which server socket open.
                     //If you change port then change the port number in the server side code also.
 
-                    toast("Device Pairing starting");
+                    toast("Serching for server");
                     InetAddress addr = InetAddress.getByName("192.168.43.1");
                     Socket s = new Socket(addr, 9002);
 
@@ -160,12 +143,15 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         @Override
                         public void run() {
                             if(st.equals("true")){
-                                status.setText("Present has been marked");
+                                status.setText("Present \nmarked");
                                 status.setEnabled(false);
-                                status.setBackgroundColor(Color.rgb(50,205,50));
+                                status.setBackground(getResources().getDrawable(R.drawable.circular_present_shadow));
                             }
                             else if(st.equals("You cannot mark more than one attendence"))
-                                toast("You cannot mark more than one attendence");
+                                toast("Cannot mark attendence more than once");
+                            else if(st.equalsIgnoreCase("FROM SERVER - " +msg)){
+                                toast("Roll no out of range for attendence");
+                            }
                             else{
                                 String s = mTextViewReplyFromServer.getText().toString();
                                 if (st.trim().length() != 0)
