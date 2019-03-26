@@ -38,14 +38,22 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        mEditTextSendMessage = findViewById(R.id.edt_send_message);
+        mTextViewReplyFromServer = findViewById(R.id.tv_reply_from_server);
+        Button buttonSend = findViewById(R.id.btn_send);
         status = findViewById(R.id.status);
 
+
         status.setOnClickListener(this);
+        buttonSend.setOnClickListener(this);
     }
    @Override
     public void onClick(View v) {
 
         switch (v.getId()) {
+            case R.id.btn_send:
+                sendMessage(mEditTextSendMessage.getText().toString());
+                break;
 
             case R.id.status:
                 wm = (WifiManager) getApplicationContext().getSystemService(WIFI_SERVICE);
