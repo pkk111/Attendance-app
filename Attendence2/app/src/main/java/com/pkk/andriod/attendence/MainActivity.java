@@ -1,6 +1,7 @@
 package com.pkk.andriod.attendence;
 
 import android.app.AlertDialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.os.Handler;
@@ -10,9 +11,12 @@ import android.support.v7.widget.CardView;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.InputType;
+import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -35,17 +39,14 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     private RecyclerView recyclerView;
     private attendenceadapter madapter;
-    private boolean end = true;
-    private boolean check=false;
-    private boolean check2=true;
-    private boolean check3=true;
-    private boolean check4=true;
+    private boolean check=true;
     private boolean checker=false;
+    private boolean stop=true;
     private MessageExtractor me;
     private String ip="";
     private int x=0;
+    private int start=0;
     static String output="";
-    private String noofstud="";
     private Thread thread;
 
     @Override
@@ -71,9 +72,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             public void run() {
 
                 try {
-
+                    if(stop){
                     ServerSocket ss = new ServerSocket(9002);
-                    while (end) {
                         //Server is waiting for client here, if needed
                         Socket s = ss.accept();
                         BufferedReader input = new BufferedReader(new InputStreamReader(s.getInputStream()));
@@ -87,21 +87,16 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                             e.printStackTrace();
                         }
                         if (stringData.equalsIgnoreCase("STOP")) {
-                            end = true;
                             output.close();
                             s.close();
-                            check3=true;
-                            check4=true;
-                            thread.stop();
-                            buttonReceiving.setText("Start Reciving data");
-                            break;
+                            ss.close();
+                            buttonReceiving.callOnClick();
                         }
                         output.println(message);
                         output.flush();
                         output.close();
                         s.close();
-                    }
-                    ss.close();
+                    ss.close();}
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
@@ -154,11 +149,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         e.printStackTrace();
                         toast("Error name: "+e);
                     }
-                    if(rollno(stringdata)<=me.getstud()){
+                    if((rollno(stringdata)-start)<=me.getstud()){
                         checker=false;
                         me.update(rollno(stringdata),ip,status(stringdata));
-                        setRecyclerView();
-                        if(me.getstatus()[rollno(stringdata)-1]){
+                        madapter.notifyDataSetChanged();
+                        if(me.getstatus()[rollno(stringdata)-start]){
                             output="true";
                         }
                     }
@@ -214,37 +209,40 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         switch (v.getId()) {
             case R.id.btn_receiving:
-                if(check4){
-                check4=false;
-                noofstud="";
-                check=false;
+                if(check){
                 AlertDialog.Builder builder =new AlertDialog.Builder(this);
-                builder.setTitle("Total no of Students?");
 
-                // Set up the input
-                final EditText input = new EditText(this);
-                // Specify the type of input expected; this, for example, sets the input as a password, and will mask the text
-                input.setInputType(InputType.TYPE_CLASS_NUMBER);
-                builder.setView(input);
+                    LayoutInflater inflater=LayoutInflater.from(this);
+
+                    final View entryview = inflater.inflate(R.layout.alert_label_editor,null);
+                    final EditText startroll= entryview.findViewById(R.id.start);
+                    final EditText endroll = entryview.findViewById(R.id.end);
+
+                    builder.setView(entryview).setTitle("Enter RollNo Range! ");
 
                 // Set up the buttons
-                builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                builder.setPositiveButton("Start", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        if(check3){
-                        noofstud=input.getText().toString().trim();
-                        if(!noofstud.isEmpty()){
-                            check=true;
-                            check2=true;
-                                toast("Enter number of student correctly");
-                                check2=false;
-                            }
-                        if(check && check2){
-                            me=new MessageExtractor(Integer.parseInt(noofstud));
+                        if(!startroll.getText().toString().isEmpty() && !endroll.getText().toString().isEmpty())
+                        {start=Integer.parseInt(startroll.getText().toString());
+                        int end = Integer.parseInt(endroll.getText().toString());
+                        if(start<=end){
+                            me=new MessageExtractor(start,end);
+                            stop=true;
+                            setRecyclerView();
                             startServerSocket();
-                            buttonReceiving.setText("STOP Reciving data");
-                            refresh.setEnabled(true);}
-                    }}
+                            check=false;
+                            refresh.setEnabled(true);
+                            buttonReceiving.setText("Stop Reciving Data");
+                        }
+                        else
+                            toast("Enter the Starting and Ending RollNo correctly");
+                    }
+                    else
+                        toast("Enter both Starting and Ending RollNo");
+                    }
+
                 });
                 builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
                     @Override
@@ -252,14 +250,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         dialog.cancel();
                     }
                 });
-
                 builder.show();
                 break;
                 }
                 else{
-                check3=true;
-                check4=true;
-                thread.stop();
+                check=true;
+                stop=false;
                 buttonReceiving.setText("Start Reciving data");
                 break;}
             case R.id.Refresh:

@@ -6,24 +6,27 @@ import android.graphics.Color;
 public class MessageExtractor {
 
     private static int noofstud;
+    private static int start;
     private static String[] studip;
     private static Boolean[] stud;
     public static int roll[];
 
-      MessageExtractor(int l){
-        this.noofstud = l;
-        stud = new Boolean[l];
-        studip = new String[l];
-        roll = new int[l];
-        for(int x=0;x<l;x++){
+      MessageExtractor(int start,int end){
+        this.noofstud = end-start+1;
+        this.start=start;
+        stud = new Boolean[noofstud];
+        studip = new String[noofstud];
+        roll = new int[noofstud];
+        for(int x=0;x<noofstud;x++){
             stud[x] = false;
-            roll[x] = x+1;
+            roll[x] = start+x;
             studip[x]=Integer.toString(x);
         }
     }
 
     static void update(int rollno,String ip,Boolean present){
         Boolean check=true;
+        rollno-=start;
         for(int x=0;x<noofstud;x++){
             if(studip!=null)
                 if(studip[x].equals(ip)){
@@ -33,7 +36,6 @@ public class MessageExtractor {
                 }
         }
         if(check){
-            --rollno;
             studip[rollno]=ip;
             stud[rollno]=present;
         }
