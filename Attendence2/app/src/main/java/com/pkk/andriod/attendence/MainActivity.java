@@ -152,7 +152,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     if((rollno(stringdata)-start)<=me.getstud()){
                         checker=false;
                         me.update(rollno(stringdata),ip,status(stringdata));
-                        setRecyclerView();
+                        madapter.notifyDataSetChanged();
                         if(me.getstatus()[rollno(stringdata)-start]){
                             output="true";
                         }
