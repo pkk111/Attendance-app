@@ -19,6 +19,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:id="@+id/start"
+            android:inputType="number"
             android:layout_margin="10dp"
             android:padding="5dp" />
     </LinearLayout>
@@ -37,6 +38,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:id="@+id/end"
+            android:inputType="number"
             android:layout_margin="10dp"
             android:padding="5dp"/>
     </LinearLayout>
