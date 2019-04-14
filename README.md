@@ -13,7 +13,7 @@ It ensures that one student can only mark one attendence as the teacher's side a
 This app can also be used to take attendence at vorious other organisations and companies.
  
  ---
- ##Contributors
+ ***Contributors***
  
  - Prateek kocher 
  <kocherprateek2001@gmail.com>
