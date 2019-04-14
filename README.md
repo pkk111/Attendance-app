@@ -8,6 +8,7 @@ In "attendance" is the student's end app and "attendance 2" is teacher's end app
  
  ---
  ##Contributors
- -Prateek kocher
+ 
+ - Prateek kocher
  <kocherprateek2001@gmail.com>
  ---
