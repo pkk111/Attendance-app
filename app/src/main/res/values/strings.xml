@@ -1,0 +1,11 @@
+<resources>
+    <string name="app_name">Attendance</string>
+    <string name="rollnumber">Roll No.</string>
+    <string name="attendence_status">Status</string>
+    <string name="username">Username</string>
+    <string name="password">Password</string>
+    <string-array name="user_type">
+        <item>Student</item>
+        <item>Teacher</item>
+    </string-array>
+</resources>

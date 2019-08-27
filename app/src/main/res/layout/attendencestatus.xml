@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:appNs="http://schemas.android.com/apk/res-auto"
+    android:layout_height="wrap_content"
+    android:layout_width="match_parent">
+    <androidx.cardview.widget.CardView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        appNs:cardElevation="10dp"
+        android:layout_margin="5dp"
+        android:id="@+id/notification_background"
+        appNs:cardBackgroundColor="@color/colorPrimary"
+        appNs:cardCornerRadius="15dp">
+
+        <LinearLayout
+            android:layout_height="wrap_content"
+            android:layout_width="match_parent"
+            android:layout_margin="10dp"
+            android:orientation="vertical"
+            android:textAlignment="center"
+            android:padding="8dp">
+            <TextView
+                android:layout_height="wrap_content"
+                android:layout_width="wrap_content"
+                android:textStyle="bold"
+                android:id="@+id/rollno"
+                android:textSize="24sp"
+                android:text="@string/rollnumber"
+                android:layout_marginBottom="5dp"/>
+            <TextView
+                android:layout_height="wrap_content"
+                android:layout_width="wrap_content"
+                android:textSize="20dp"
+                android:text="@string/attendence_status"
+                android:id="@+id/status"
+                android:textStyle="italic"/>
+
+        </LinearLayout>
+    </androidx.cardview.widget.CardView>
+
+</RelativeLayout>
