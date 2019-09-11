@@ -10,9 +10,9 @@ It ensures that one student can only mark one attendence as the teacher's side a
 
 This app can also be used to take attendence at vorious other organisations and companies.
  
-#Future Goals
+Future Goals
 --
-The future of this application is to have more features including to store data, show analysis of a student's attendance and predict whether a student is likely to come to class in a certain period or not.
+The future goals of this application is to have more features including to store data, show analysis of a student's attendance and predict whether a student is likely to come to class in a certain period or not.
 
  ---
  ## Contributors
