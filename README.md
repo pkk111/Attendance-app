@@ -8,7 +8,7 @@ It works on the wifi-hotspot feature on android devices.
 
 It ensures that one student can only mark one attendence as the teacher's side app keeps the record of the ip address of the phones who are requesting to mark attendence.
 
-This app can also be used to take attendence at vorious other organisations and companies.
+This app can also be used to take attendence at various other organisations and companies.
  
 Future Goals
 --
@@ -17,6 +17,6 @@ The future goals of this application is to have more features including to store
  ---
  ## Contributors
  
- - Prateek kocher 
+ - Prateek kocher
  <kocherprateek2001@gmail.com>
  ---
