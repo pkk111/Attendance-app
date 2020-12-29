@@ -4,6 +4,8 @@
     <string name="attendence_status">Status</string>
     <string name="username">Username</string>
     <string name="password">Password</string>
+    <string name="teacher">Teacher</string>
+    <string name="student">Student</string>
     <string-array name="user_type">
         <item>Student</item>
         <item>Teacher</item>

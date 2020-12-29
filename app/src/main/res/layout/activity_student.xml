@@ -1,66 +1,78 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:background="@drawable/background_lightblue">
+
     <TableRow
         android:id="@+id/tr_send_message"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:gravity="center"
-        android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true"
+        android:layout_alignParentLeft="true"
         android:layout_alignParentTop="true"
-        android:layout_marginTop="11dp">
+        android:layout_marginTop="11dp"
+        android:gravity="center"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintLeft_toLeftOf="parent">
 
         <EditText
             android:id="@+id/edt_send_message"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:layout_marginRight="10dp"
             android:layout_marginLeft="10dp"
+            android:layout_marginRight="10dp"
+            android:layout_weight="1"
             android:hint="Enter message"
             android:inputType="text"
-            android:windowSoftInputMode="adjustResize"/>
+            android:windowSoftInputMode="adjustResize" />
 
         <Button
             android:id="@+id/btn_send"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginEnd="10dp"
             android:layout_marginRight="10dp"
-            android:text="Send"
-            android:layout_marginEnd="10dp" />
+            android:text="Send" />
     </TableRow>
 
 
     <ScrollView
+        android:id="@+id/scrollView2"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true"
-        android:layout_below="@+id/tr_send_message"
-        android:layout_marginTop="25dp"
-        android:id="@+id/scrollView2">
+        android:layout_alignParentLeft="true"
+        android:layout_marginTop="15dp"
+        android:padding="10dp"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/tr_send_message">
 
         <TextView
             android:id="@+id/tv_reply_from_server"
             android:layout_width="match_parent"
-            android:text="Sample Text"
             android:layout_height="wrap_content"
-            android:orientation="vertical" />
+            android:orientation="vertical"
+            android:text="Admin powers" />
     </ScrollView>
+
     <Button
-    android:layout_width="200dp"
-    android:layout_height="200dp"
-    android:layout_centerVertical="true"
-    android:layout_centerHorizontal="true"
-    android:background="@drawable/circular_absent_shadow"
-    android:text="absent"
-    android:textSize="32sp"
-    android:textStyle="bold"
-    android:layout_marginLeft="10dp"
-    android:layout_marginRight="10dp"
-    android:padding="10sp"
-    android:id="@+id/status" />
-</RelativeLayout>
+        android:id="@+id/status"
+        android:layout_width="200dp"
+        android:layout_height="200dp"
+        android:layout_centerHorizontal="true"
+        android:layout_centerVertical="true"
+        android:layout_marginLeft="10dp"
+        android:layout_marginRight="10dp"
+        android:background="@drawable/stop_button_background"
+        android:padding="10dp"
+        android:text="absent"
+        android:textSize="32sp"
+        android:textStyle="bold"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/scrollView2"
+        app:layout_constraintBottom_toBottomOf="parent"/>
+</androidx.constraintlayout.widget.ConstraintLayout>

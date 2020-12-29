@@ -2,6 +2,7 @@ package com.pkk.andriod.attendence.activity;
 
 import android.app.AlertDialog;
 import android.content.DialogInterface;
+import android.net.DhcpInfo;
 import android.net.wifi.WifiManager;
 import android.os.Looper;
 import androidx.appcompat.app.AppCompatActivity;
@@ -15,7 +16,9 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
+import com.google.gson.Gson;
 import com.pkk.andriod.attendence.R;
+import com.pkk.andriod.attendence.misc.MessageModel;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -26,7 +29,7 @@ import java.net.InetAddress;
 import java.net.Socket;
 
 
-public class StudantActivity extends AppCompatActivity implements View.OnClickListener{
+public class StudentActivity extends AppCompatActivity implements View.OnClickListener{
 
     private TextView mTextViewReplyFromServer;
     private EditText mEditTextSendMessage;
@@ -35,6 +38,7 @@ public class StudantActivity extends AppCompatActivity implements View.OnClickLi
     private String rollno;
     private Boolean check=true;
     private Boolean checksend=true;
+    private MessageModel model;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -46,7 +50,6 @@ public class StudantActivity extends AppCompatActivity implements View.OnClickLi
         Button buttonSend = findViewById(R.id.btn_send);
         status = findViewById(R.id.status);
 
-
         status.setOnClickListener(this);
         buttonSend.setOnClickListener(this);
     }
@@ -55,7 +58,8 @@ public class StudantActivity extends AppCompatActivity implements View.OnClickLi
 
         switch (v.getId()) {
             case R.id.btn_send:
-                sendMessage(mEditTextSendMessage.getText().toString());
+                MessageModel m = new MessageModel(1, mEditTextSendMessage.getText().toString());
+                sendMessage(m);
                 checksend=true;
                 break;
 
@@ -79,10 +83,9 @@ public class StudantActivity extends AppCompatActivity implements View.OnClickLi
                         {
                             if(check){
 
-                                    String message = Formatter.formatIpAddress(wm.getConnectionInfo().getIpAddress());
-                                    message = iphandeler(message);
-                                    message += " " + rollno + " true";
-                                    sendMessage(message);
+                                    String ip = Formatter.formatIpAddress(wm.getConnectionInfo().getIpAddress());
+                                    ip = iphandeler(ip);
+                                    sendMessage(new MessageModel(ip, Integer.parseInt(rollno), true));
                             }
                         }
                         else
@@ -123,7 +126,10 @@ public class StudantActivity extends AppCompatActivity implements View.OnClickLi
         return ip;
     }
 
-    private void sendMessage(final String msg) {
+    private void sendMessage(MessageModel message) {
+
+        final Gson g = new Gson();
+        final String msg = g.toJson(message);
 
         final Handler handler = new Handler();
         Thread thread = new Thread(new Runnable() {
@@ -135,7 +141,8 @@ public class StudantActivity extends AppCompatActivity implements View.OnClickLi
                     //If you change port then change the port number in the server side code also.
 
                     toast("Serching for server");
-                    InetAddress addr = InetAddress.getByName("192.168.43.1");
+
+                    InetAddress addr = InetAddress.getByName("192.168.43.15");
                     Socket s = new Socket(addr, 9002);
 
                     OutputStream out = s.getOutputStream();
@@ -147,26 +154,24 @@ public class StudantActivity extends AppCompatActivity implements View.OnClickLi
 
                     toast("Message is send");
                     BufferedReader input = new BufferedReader(new InputStreamReader(s.getInputStream()));
-                    final String st = input.readLine();
-
+                    final String reply = input.readLine();
+                    final MessageModel m = g.fromJson(reply, MessageModel.class);
                     handler.post(new Runnable() {
                         @Override
                         public void run() {
-                            if (st.equals("true")){
+                            if (m.getError_code()==0){
                                 status.setText("Present \nmarked");
                                 status.setEnabled(false);
-                                status.setBackground(getResources().getDrawable(R.drawable.circular_present_shadow));
+                                status.setBackground(getResources().getDrawable(R.drawable.start_button_background));
                             }
-                            else if (st.equals("You cannot mark more than one attendence"))
-                                toast("Cannot mark attendence more than once");
-                            else if (st.equalsIgnoreCase("FROM SERVER - " +msg)){
-                                if (checksend==false)
-                                toast("Roll no out of range for attendence");
-                            }
+                            else if (m.getError_code()==2)
+                                toast(m.getMessage());
+                            else if (m.getError_code()==3)
+                                toast(m.getMessage());
                             else{
                                 String s = mTextViewReplyFromServer.getText().toString();
-                                if (st.trim().length() != 0)
-                                    mTextViewReplyFromServer.setText(s + "\n From Server : " + st);
+                                if (m.getError_code()==1)
+                                    mTextViewReplyFromServer.setText(s + "\n From Server : " + m.getMessage());
                             }
                         }
                     });

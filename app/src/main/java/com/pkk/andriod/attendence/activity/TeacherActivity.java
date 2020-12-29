@@ -4,10 +4,16 @@ import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.os.Handler;
 import android.os.Looper;
+
 import androidx.appcompat.app.AppCompatActivity;
+
 import android.os.Bundle;
+
+import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
@@ -15,9 +21,13 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.gson.Gson;
 import com.pkk.andriod.attendence.R;
 import com.pkk.andriod.attendence.adapter.TeacherAdapter;
 import com.pkk.andriod.attendence.misc.MessageExtractor;
+import com.pkk.andriod.attendence.misc.MessageModel;
+import com.pkk.andriod.attendence.misc.Utils;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -32,31 +42,31 @@ public class TeacherActivity extends AppCompatActivity implements View.OnClickLi
 
     final Handler handler = new Handler();
 
+    private FloatingActionButton refresh;
+    private FloatingActionButton add;
     private Button buttonReceiving;
-    private Button refresh;
     private TextView textViewDataFromClient;
     private RecyclerView recyclerView;
     private TeacherAdapter madapter;
-    private boolean check=true;
-    private boolean checker=false;
-    private boolean stop=true;
+    private boolean check = true;
+    private boolean checker = false;
+    private boolean stop = true;
     private MessageExtractor me;
-    private String ip="";
-    private int x=0;
-    private int start=0;
-    static String output="";
+    private String ip = "";
+    private int x = 0;
+    private int start = 0;
     private Thread thread;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_student);
+        setContentView(R.layout.activity_teacher);
 
         initalize();
         madapter = new TeacherAdapter(this);
         buttonReceiving.setOnClickListener(this);
         refresh.setOnClickListener(this);
-        refresh.setEnabled(false);
+        add.setOnClickListener(this);
     }
 
     private void startServerSocket() {
@@ -69,14 +79,18 @@ public class TeacherActivity extends AppCompatActivity implements View.OnClickLi
             public void run() {
 
                 try {
-                    if(stop){
+                    if (stop) {
                         ServerSocket ss = new ServerSocket(9002);
                         //Server is waiting for client here, if needed
                         Socket s = ss.accept();
                         BufferedReader input = new BufferedReader(new InputStreamReader(s.getInputStream()));
                         PrintWriter output = new PrintWriter(s.getOutputStream());
                         stringData = input.readLine();
-                        String message=updateUI(stringData);
+                        Log.e("reply",""+stringData);
+                        Gson g = new Gson();
+                        MessageModel model = g.fromJson(stringData, MessageModel.class);
+                        MessageModel m = updateUI(model);
+                        String message = g.toJson(m);
                         try {
                             Thread.sleep(100);
                         } catch (InterruptedException e) {
@@ -92,7 +106,8 @@ public class TeacherActivity extends AppCompatActivity implements View.OnClickLi
                         output.flush();
                         output.close();
                         s.close();
-                        ss.close();}
+                        ss.close();
+                    }
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
@@ -114,90 +129,60 @@ public class TeacherActivity extends AppCompatActivity implements View.OnClickLi
         });
     }
 
-    private void initalize(){
+    private void initalize() {
         buttonReceiving = findViewById(R.id.btn_receiving);
-        refresh = findViewById(R.id.Refresh);
+        refresh = findViewById(R.id.refresh);
+        add = findViewById(R.id.add_rollno);
         textViewDataFromClient = findViewById(R.id.clientmess);
         recyclerView = findViewById(R.id.recycler_view);
     }
 
-    private void setRecyclerView(){
+    private void setRecyclerView() {
         recyclerView.setAdapter(madapter);
-        recyclerView.setLayoutManager(new LinearLayoutManager(this));
-        madapter.setattendence(me.getattendence(),me.getstatus());
+        recyclerView.setLayoutManager(new GridLayoutManager(this, 2));
+        madapter.setattendence(me.getattendence(), me.getstatus());
         madapter.notifyDataSetChanged();
     }
 
-    private String updateUI(final String stringdata) {
+    private MessageModel updateUI(final MessageModel m) {
+        MessageModel output = new MessageModel();
 
+        final MessageModel finalOutput = output;
         handler.post(new Runnable() {
             @Override
             public void run() {
-                int l=stringdata.length();
-                checker=true;
-                if(l>15){
-                    if(ipcheck(stringdata))
-                    {try {
-                        ip=stringdata.substring(0,15);
-                        InetAddress ipadd=InetAddress.getByName(ip);
-                        ip=ipadd.toString();
-                    } catch (UnknownHostException e) {
-                        e.printStackTrace();
-                        toast("Error name: "+e);
-                    }
-                        if((rollno(stringdata)-start)<= MessageExtractor.getstud()){
-                            checker=false;
-                            me.update(TeacherActivity.this, rollno(stringdata), ip, status(stringdata));
-                            madapter.notifyDataSetChanged();
-                            if(me.getstatus()[rollno(stringdata)-start]){
-                                output="true";
-                            }
+                if (m.getError_code() == 1) {
+                    textViewDataFromClient.setText(textViewDataFromClient.getText().toString() + "From Client: " + m.getMessage() + "\n");
+                    checker = false;
+                } else if (m.getError_code() == 0) {
+                    checker = true;
+                        ip = m.getIp();
+                    if (!me.checkIP(m.getIp())) {
+                        finalOutput.setError_code(2);
+                        finalOutput.setMessage("You cannot mark more than one attendance in this session");
+                    } else if (!me.update(m.getRoll_no(), m.getIp(), m.isPresent())) {
+                        finalOutput.setError_code(3);
+                        finalOutput.setError_msg("Enter a valid roll number");
+                    } else {
+                        madapter.notifyDataSetChanged();
+                        if (me.getstatus().get(m.getRoll_no() - start)) {
+                            finalOutput.setError_code(0);
+                            finalOutput.setPresent(true);
                         }
                     }
+
+
                 }
-                if(checker){
-                    String s = textViewDataFromClient.getText().toString();
-                    if (stringdata.trim().length() != 0)
-                        textViewDataFromClient.setText(s + "\n" + "From Client : " + stringdata);
-                    output="FROM SERVER - " + stringdata.toUpperCase();
-                    checker=false;}
             }
         });
-        if(!checker) {
+        if (m.isPresent()) {
             try {
                 Thread.sleep(100);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
         }
-        return output;
-    }
-
-    boolean ipcheck(String s){
-        Character c1=s.charAt(3);
-        Character c2=s.charAt(7);
-        Character c3=s.charAt(11);
-        if(c1.equals('.') && c2.equals('.') && c3.equals('.'))
-            return true;
-        return false;
-    }
-
-    boolean status(String s){
-
-        if(s.substring(x+1).equals("true"))
-            return true;
-        return false;
-    }
-
-    int rollno(String s){
-        x=16;
-        while(x<s.length()){
-            char c=s.charAt(x);
-            if(c==' ')
-                break;
-            x++;
-        }
-        return Integer.parseInt(s.substring(16,x));
+        return finalOutput;
     }
 
     @Override
@@ -205,43 +190,43 @@ public class TeacherActivity extends AppCompatActivity implements View.OnClickLi
 
         switch (v.getId()) {
             case R.id.btn_receiving:
-                if(check){
-                    AlertDialog.Builder builder =new AlertDialog.Builder(this);
+                if (check) {
+                    AlertDialog.Builder builder = new AlertDialog.Builder(this);
 
-                    LayoutInflater inflater=LayoutInflater.from(this);
+                    LayoutInflater inflater = LayoutInflater.from(this);
 
-                    final View entryview = inflater.inflate(R.layout.alert_label_editor,null);
-                    final EditText startroll= entryview.findViewById(R.id.start);
+                    final View entryview = inflater.inflate(R.layout.alert_label_editor, null);
+                    final EditText startroll = entryview.findViewById(R.id.start);
                     final EditText endroll = entryview.findViewById(R.id.end);
 
-                    builder.setView(entryview).setTitle("Enter RollNo Range! ");
+                    builder.setView(entryview).setTitle("Enter RollNo Range ");
 
                     // Set up the buttons
                     builder.setPositiveButton("Start", new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
-                            int end=0;
-                            if(!startroll.getText().toString().isEmpty() && !endroll.getText().toString().isEmpty())
-                            {
-                                try{start=Integer.parseInt(startroll.getText().toString());
+                            int end = 0;
+                            if (!startroll.getText().toString().isEmpty() && !endroll.getText().toString().isEmpty()) {
+                                try {
+                                    start = Integer.parseInt(startroll.getText().toString());
                                     end = Integer.parseInt(endroll.getText().toString());
-                                }
-                                catch(Exception e){
+                                } catch (Exception e) {
                                     toast("Enter rollno correctly");
                                 }
-                                if(start<=end){
-                                    me=new MessageExtractor(start,end);
-                                    stop=true;
+                                if (start <= end) {
+                                    me = new MessageExtractor(start, end);
+                                    stop = true;
                                     setRecyclerView();
                                     startServerSocket();
-                                    check=false;
+                                    check = false;
                                     refresh.setEnabled(true);
-                                    buttonReceiving.setText("Stop Reciving Data");
-                                }
-                                else
+                                    buttonReceiving.setText("Stop");
+                                    buttonReceiving.setBackgroundResource(R.drawable.stop_button_background);
+                                    add.setVisibility(View.VISIBLE);
+                                    refresh.setVisibility(View.VISIBLE);
+                                } else
                                     toast("Enter the Starting and Ending RollNo correctly");
-                            }
-                            else
+                            } else
                                 toast("Enter both Starting and Ending RollNo");
                         }
 
@@ -254,15 +239,43 @@ public class TeacherActivity extends AppCompatActivity implements View.OnClickLi
                     });
                     builder.show();
                     break;
+                } else {
+                    check = true;
+                    stop = false;
+                    buttonReceiving.setText("Start");
+                    buttonReceiving.setBackgroundResource(R.drawable.start_button_background);
+                    break;
                 }
-                else{
-                    check=true;
-                    stop=false;
-                    buttonReceiving.setText("Start Reciving data");
-                    break;}
-            case R.id.Refresh:
+            case R.id.refresh:
                 madapter.notifyDataSetChanged();
                 break;
+            case R.id.add_rollno:
+                AlertDialog.Builder builder = new AlertDialog.Builder(this);
+
+                LayoutInflater inflater = LayoutInflater.from(this);
+
+                final View entryview = inflater.inflate(R.layout.layout_alert_dialog_add_roll_no, null);
+                final EditText rollEditText = entryview.findViewById(R.id.alert_dialog_add_roll_edittext);
+
+                builder.setView(entryview).setTitle("Roll Number to be Added ");
+
+                // Set up the buttons
+                builder.setPositiveButton("Start", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        int roll = Integer.parseInt(rollEditText.getText().toString());
+                        me.addStud(TeacherActivity.this, roll);
+                        madapter.notifyDataSetChanged();
+                    }
+
+                });
+                builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.cancel();
+                    }
+                });
+                builder.show();
         }
     }
 }

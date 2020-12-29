@@ -19,7 +19,7 @@
         <shape android:shape="oval"
             android:thickness="100dp">
             <gradient
-                android:startColor="#900000"
+                android:startColor="#800000"
                 android:centerColor="@android:color/holo_red_dark"
                 android:type="radial"
                 android:gradientRadius="80dp"

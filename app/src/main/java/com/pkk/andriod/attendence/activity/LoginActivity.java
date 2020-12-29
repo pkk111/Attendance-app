@@ -2,18 +2,18 @@ package com.pkk.andriod.attendence.activity;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
-import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
-import android.widget.Button;
-import android.widget.Spinner;
+import android.widget.ImageButton;
 
 import com.pkk.andriod.attendence.R;
 
 public class LoginActivity extends AppCompatActivity {
 
     private boolean isTeacher = false;
+    private ImageButton student;
+    private ImageButton teacher;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -23,35 +23,30 @@ public class LoginActivity extends AppCompatActivity {
     }
 
     void initialize() {
-        Spinner spinner = findViewById(R.id.user_type);
-        ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this, R.array.user_type, R.layout.support_simple_spinner_dropdown_item);
-        spinner.setAdapter(adapter);
-        spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                if (position == 1)
-                    isTeacher = true;
-                else if (position == 0)
-                    isTeacher = false;
-            }
-
-            @Override
-            public void onNothingSelected(AdapterView<?> parent) {
-
-            }
-        });
-        Button signin = findViewById(R.id.sign_in);
-        signin.setOnClickListener(new View.OnClickListener() {
+        student = findViewById(R.id.student_login);
+        teacher = findViewById(R.id.teacher_login);
+        student.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                signIn();
+                studentLogin();
+            }
+        });
+        teacher.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                teacherLogin();
             }
         });
     }
 
-    private void signIn() {
-
+    private void studentLogin() {
+        Intent i = new Intent(this, StudentActivity.class);
+        startActivity(i);
     }
 
-
+    private void teacherLogin() {
+        Intent i = new Intent(this, TeacherActivity.class);
+        startActivity(i);
+    }
+    
 }

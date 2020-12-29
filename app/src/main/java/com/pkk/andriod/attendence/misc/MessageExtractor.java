@@ -5,65 +5,102 @@ import android.graphics.Color;
 
 import com.pkk.andriod.attendence.activity.TeacherActivity;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class MessageExtractor {
 
 
     private static int noofstud;
-    private static int start;
-    private static String[] studip;
-    private static Boolean[] stud;
-    public static int roll[];
+    private static int start=0;
+    private static int end=0;
+    private static List<String> studip;
+    private static List<Boolean> stud;
+    public static List<Integer> roll;
 
-    public MessageExtractor(int start, int end){
-        this.noofstud = end-start+1;
-        this.start=start;
-        stud = new Boolean[noofstud];
-        studip = new String[noofstud];
-        roll = new int[noofstud];
-        for(int x=0;x<noofstud;x++){
-            stud[x] = false;
-            roll[x] = start+x;
-            studip[x]=Integer.toString(x);
+    public MessageExtractor(int start, int end) {
+        this.noofstud = end - start + 1;
+        this.start = start;
+        this.end = end;
+        roll = new ArrayList<>();
+        studip = new ArrayList<>();
+        stud = new ArrayList<>();
+        for (int x = 0; x < noofstud; x++) {
+            stud.add(false);
+            roll.add(this.start+x);
+            studip.add("");
         }
     }
 
-    public static void update(Context context, int rollno, String ip, Boolean present){
-        Boolean check=true;
-        rollno-=start;
-        for(int x=0;x<noofstud;x++){
-            if(studip!=null)
-                if(studip[x].equals(ip)){
-                    Utils.showShortToast(context,"You cannot mark more than one attendence");
-                    check=false;
-                    break;
+    public static boolean checkIP(String ip) {
+        if (!studip.isEmpty())
+            for (int x = 0; x < noofstud; x++) {
+                if (!studip.get(x).isEmpty() && studip.get(x).equals(ip)) {
+                    return false;
+                }
+            }
+        return true;
+    }
+
+    public static boolean update(int rollno, String ip, Boolean present) {
+        if (!(rollno >= start && rollno <= end)) {
+            for (int i = end - start+1; i < noofstud; i++)
+                if (roll.get(i) == rollno) {
+                    studip.set(i, ip);
+                    stud.set(i, present);
+                    return true;
                 }
         }
-        if(check){
-            studip[rollno]=ip;
-            stud[rollno]=present;
+        else if(rollno >= start && rollno <= end){
+            studip.set(rollno-start, ip);
+            stud.set(rollno-start, present);
+            return true;
         }
+        return false;
     }
 
-    public static int[] getattendence(){
+    public static List<Integer> getattendence() {
         return roll;
     }
 
-    public static int getstud(){return noofstud;}
+    public static int getstud() {
+        return noofstud;
+    }
 
-    public static Boolean[] getstatus(){
+    public static List<Boolean> getstatus() {
         return stud;
     }
 
-    public static int getcolor(Boolean bool){
-        if(bool)
-            return Color.rgb(50,205,50);
-        return Color.rgb(220,20,60);
+    public static int getcolor(Boolean bool) {
+        if (bool)
+            return Color.rgb(50, 205, 50);
+        return Color.rgb(220, 20, 60);
     }
 
-    public static String getattendence(Boolean bool){
-        if(bool)
+    public static String getattendence(Boolean bool) {
+        if (bool)
             return "Present";
         return "Absent";
     }
 
+    public void addStud(Context context, int rollno) {
+        if (!(rollno >= start && rollno <= end)) {
+            for (int i = end - start; i < noofstud; i++)
+                if (roll.get(i) == rollno) {
+                    Utils.showShortToast(context, rollno+" already present for evaluation.");
+                    return;
+                }
+        }
+        else if(rollno >= start && rollno <= end){
+            Utils.showShortToast(context, rollno+" already present for evaluation.");
+            return;
+        }
+        stud.add(false);
+        roll.add(rollno);
+        noofstud++;
+    }
+
+    static public void setStatus(int i, Boolean s){
+        stud.set(i, s);
+    }
 }
