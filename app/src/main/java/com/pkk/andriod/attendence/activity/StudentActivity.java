@@ -142,7 +142,7 @@ public class StudentActivity extends AppCompatActivity implements View.OnClickLi
 
                     toast("Serching for server");
 
-                    InetAddress addr = InetAddress.getByName("192.168.43.15");
+                    InetAddress addr = InetAddress.getByName("192.168.43.1");
                     Socket s = new Socket(addr, 9002);
 
                     OutputStream out = s.getOutputStream();
