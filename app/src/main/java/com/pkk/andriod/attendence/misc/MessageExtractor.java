@@ -73,7 +73,7 @@ public class MessageExtractor {
 
     public static int getcolor(Boolean bool) {
         if (bool)
-            return Color.rgb(50, 205, 50);
+            return Color.rgb(90, 205, 60);
         return Color.rgb(220, 20, 60);
     }
 
@@ -102,5 +102,9 @@ public class MessageExtractor {
 
     static public void setStatus(int i, Boolean s){
         stud.set(i, s);
+    }
+
+    public int getStart() {
+        return start;
     }
 }

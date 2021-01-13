@@ -2,6 +2,10 @@ package com.pkk.andriod.attendence.activity;
 
 import android.app.AlertDialog;
 import android.content.DialogInterface;
+import android.content.IntentFilter;
+import android.net.wifi.p2p.WifiP2pDevice;
+import android.net.wifi.p2p.WifiP2pDeviceList;
+import android.net.wifi.p2p.WifiP2pManager;
 import android.os.Handler;
 import android.os.Looper;
 
@@ -10,7 +14,6 @@ import androidx.appcompat.app.AppCompatActivity;
 import android.os.Bundle;
 
 import androidx.recyclerview.widget.GridLayoutManager;
-import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.util.Log;
@@ -22,40 +25,48 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
-import com.google.gson.Gson;
 import com.pkk.andriod.attendence.R;
+import com.pkk.andriod.attendence.AsyncTasks.ServerAsyncSocket;
+import com.pkk.andriod.attendence.WifiConnectivity.WifiRelatedBroadcastReciver;
 import com.pkk.andriod.attendence.adapter.TeacherAdapter;
 import com.pkk.andriod.attendence.misc.MessageExtractor;
-import com.pkk.andriod.attendence.misc.MessageModel;
-import com.pkk.andriod.attendence.misc.Utils;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.PrintWriter;
-import java.net.InetAddress;
-import java.net.ServerSocket;
-import java.net.Socket;
-import java.net.UnknownHostException;
+import java.util.ArrayList;
 
 public class TeacherActivity extends AppCompatActivity implements View.OnClickListener {
 
     final Handler handler = new Handler();
+    TeacherActivity that = this;
 
     private FloatingActionButton refresh;
     private FloatingActionButton add;
     private Button buttonReceiving;
-    private TextView textViewDataFromClient;
+    public TextView textViewDataFromClient;
     private RecyclerView recyclerView;
-    private TeacherAdapter madapter;
-    private boolean check = true;
-    private boolean checker = false;
-    private boolean stop = true;
+    public TeacherAdapter madapter;
     private MessageExtractor me;
-    private String ip = "";
-    private int x = 0;
     private int start = 0;
-    private Thread thread;
+    private boolean isRunning = false;
+    private WifiP2pManager manager;
+    private WifiP2pManager.Channel channel;
+    private IntentFilter intentFilter;
+    private WifiRelatedBroadcastReciver broadCastReciver;
+    private ArrayList<WifiP2pDevice> peers = new ArrayList<>();
+    private ServerAsyncSocket socket1;
+    private ServerAsyncSocket socket2;
+
+    private WifiP2pManager.PeerListListener peerListListener = new WifiP2pManager.PeerListListener() {
+        @Override
+        public void onPeersAvailable(WifiP2pDeviceList wifiP2pDeviceList) {
+            ArrayList<WifiP2pDevice> refreshPeerList = new ArrayList<>(wifiP2pDeviceList.getDeviceList());
+            if (!refreshPeerList.equals(peers)) {
+                peers.clear();
+                peers.addAll(refreshPeerList);
+            }
+            if (peers.size() == 0)
+                Log.d("PeerListener", "No device found");
+        }
+    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -69,52 +80,24 @@ public class TeacherActivity extends AppCompatActivity implements View.OnClickLi
         add.setOnClickListener(this);
     }
 
-    private void startServerSocket() {
+    private void setUpWifi() {
+        manager = (WifiP2pManager) getSystemService(WIFI_P2P_SERVICE);
+        channel = manager.initialize(this, getMainLooper(), null);
+        broadCastReciver = new WifiRelatedBroadcastReciver(manager, channel, this, peerListListener);
 
-        thread = new Thread(new Runnable() {
+        discoverPeersTillSuccess();
 
-            private String stringData = null;
-
+        manager.createGroup(channel, new WifiP2pManager.ActionListener() {
             @Override
-            public void run() {
-
-                try {
-                    if (stop) {
-                        ServerSocket ss = new ServerSocket(9002);
-                        //Server is waiting for client here, if needed
-                        Socket s = ss.accept();
-                        BufferedReader input = new BufferedReader(new InputStreamReader(s.getInputStream()));
-                        PrintWriter output = new PrintWriter(s.getOutputStream());
-                        stringData = input.readLine();
-                        Log.e("reply",""+stringData);
-                        Gson g = new Gson();
-                        MessageModel model = g.fromJson(stringData, MessageModel.class);
-                        MessageModel m = updateUI(model);
-                        String message = g.toJson(m);
-                        try {
-                            Thread.sleep(100);
-                        } catch (InterruptedException e) {
-                            e.printStackTrace();
-                        }
-                        if (stringData.equalsIgnoreCase("STOP")) {
-                            output.close();
-                            s.close();
-                            ss.close();
-                            buttonReceiving.callOnClick();
-                        }
-                        output.println(message);
-                        output.flush();
-                        output.close();
-                        s.close();
-                        ss.close();
-                    }
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
+            public void onSuccess() {
+                Log.d("Creating group", "Success");
             }
 
+            @Override
+            public void onFailure(int i) {
+                Log.d("Creating group", "Success");
+            }
         });
-        thread.start();
     }
 
     public void toast(final String message) {
@@ -135,6 +118,12 @@ public class TeacherActivity extends AppCompatActivity implements View.OnClickLi
         add = findViewById(R.id.add_rollno);
         textViewDataFromClient = findViewById(R.id.clientmess);
         recyclerView = findViewById(R.id.recycler_view);
+
+        intentFilter = new IntentFilter();
+        intentFilter.addAction(WifiP2pManager.WIFI_P2P_STATE_CHANGED_ACTION);
+        intentFilter.addAction(WifiP2pManager.WIFI_P2P_PEERS_CHANGED_ACTION);
+        intentFilter.addAction(WifiP2pManager.WIFI_P2P_CONNECTION_CHANGED_ACTION);
+        intentFilter.addAction(WifiP2pManager.WIFI_P2P_THIS_DEVICE_CHANGED_ACTION);
     }
 
     private void setRecyclerView() {
@@ -144,53 +133,12 @@ public class TeacherActivity extends AppCompatActivity implements View.OnClickLi
         madapter.notifyDataSetChanged();
     }
 
-    private MessageModel updateUI(final MessageModel m) {
-        MessageModel output = new MessageModel();
-
-        final MessageModel finalOutput = output;
-        handler.post(new Runnable() {
-            @Override
-            public void run() {
-                if (m.getError_code() == 1) {
-                    textViewDataFromClient.setText(textViewDataFromClient.getText().toString() + "From Client: " + m.getMessage() + "\n");
-                    checker = false;
-                } else if (m.getError_code() == 0) {
-                    checker = true;
-                        ip = m.getIp();
-                    if (!me.checkIP(m.getIp())) {
-                        finalOutput.setError_code(2);
-                        finalOutput.setMessage("You cannot mark more than one attendance in this session");
-                    } else if (!me.update(m.getRoll_no(), m.getIp(), m.isPresent())) {
-                        finalOutput.setError_code(3);
-                        finalOutput.setError_msg("Enter a valid roll number");
-                    } else {
-                        madapter.notifyDataSetChanged();
-                        if (me.getstatus().get(m.getRoll_no() - start)) {
-                            finalOutput.setError_code(0);
-                            finalOutput.setPresent(true);
-                        }
-                    }
-
-
-                }
-            }
-        });
-        if (m.isPresent()) {
-            try {
-                Thread.sleep(100);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-        }
-        return finalOutput;
-    }
-
     @Override
     public void onClick(View v) {
 
         switch (v.getId()) {
             case R.id.btn_receiving:
-                if (check) {
+                if (!isRunning) {
                     AlertDialog.Builder builder = new AlertDialog.Builder(this);
 
                     LayoutInflater inflater = LayoutInflater.from(this);
@@ -215,15 +163,20 @@ public class TeacherActivity extends AppCompatActivity implements View.OnClickLi
                                 }
                                 if (start <= end) {
                                     me = new MessageExtractor(start, end);
-                                    stop = true;
                                     setRecyclerView();
-                                    startServerSocket();
-                                    check = false;
+
+                                    socket1 = new ServerAsyncSocket(TeacherActivity.this, me);
+                                    socket2 = new ServerAsyncSocket(TeacherActivity.this, me);
+                                    socket2.cancel(true);
+
+                                    isRunning = true;
                                     refresh.setEnabled(true);
                                     buttonReceiving.setText("Stop");
                                     buttonReceiving.setBackgroundResource(R.drawable.stop_button_background);
                                     add.setVisibility(View.VISIBLE);
                                     refresh.setVisibility(View.VISIBLE);
+                                    setUpWifi();
+                                    registerReceiver(broadCastReciver, intentFilter);
                                 } else
                                     toast("Enter the Starting and Ending RollNo correctly");
                             } else
@@ -238,14 +191,27 @@ public class TeacherActivity extends AppCompatActivity implements View.OnClickLi
                         }
                     });
                     builder.show();
-                    break;
                 } else {
-                    check = true;
-                    stop = false;
+                    isRunning = false;
+                    unregisterReceiver(broadCastReciver);
                     buttonReceiving.setText("Start");
                     buttonReceiving.setBackgroundResource(R.drawable.start_button_background);
-                    break;
+                    socket1.cancel(true);
+                    socket2.cancel(true);
+                    manager.removeGroup(channel, new WifiP2pManager.ActionListener() {
+                        @Override
+                        public void onSuccess() {
+                            Log.d("Removing group", "Success");
+                        }
+
+                        @Override
+                        public void onFailure(int i) {
+                            Log.d("Removing group", "Failed");
+                        }
+                    });
+                    Log.d("StopAttendance", "Stopped all activity helping to take attendance");
                 }
+                break;
             case R.id.refresh:
                 madapter.notifyDataSetChanged();
                 break;
@@ -276,6 +242,36 @@ public class TeacherActivity extends AppCompatActivity implements View.OnClickLi
                     }
                 });
                 builder.show();
+        }
+    }
+
+    private void discoverPeersTillSuccess() {
+        manager.discoverPeers(channel, new WifiP2pManager.ActionListener() {
+            @Override
+            public void onSuccess() {
+//                Toast.makeText(getApplicationContext(), "discSuccess", Toast.LENGTH_SHORT).show();
+                System.out.println("discSuccess");
+            }
+
+            @Override
+            public void onFailure(int i) {
+//                System.out.println("discFailed " + i);
+//                Toast.makeText(getApplicationContext(), "discFailed " + i, Toast.LENGTH_SHORT).show();
+                discoverPeersTillSuccess();
+            }
+        });
+    }
+
+    public void startListening() {
+        if(socket1.isCancelled()) {
+            socket1 = new ServerAsyncSocket(TeacherActivity.this, me);
+            socket1.execute();
+            me = socket1.getUpdatedExtractor();
+        }
+        else if(socket2.isCancelled()){
+            socket2 = new ServerAsyncSocket(TeacherActivity.this, me);
+            socket2.execute();
+            me = socket2.getUpdatedExtractor();
         }
     }
 }
