@@ -31,6 +31,8 @@ import com.pkk.andriod.attendence.WifiConnectivity.WifiRelatedBroadcastReciver;
 import com.pkk.andriod.attendence.adapter.TeacherAdapter;
 import com.pkk.andriod.attendence.misc.MessageExtractor;
 
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 
 public class TeacherActivity extends AppCompatActivity implements View.OnClickListener {
@@ -85,6 +87,26 @@ public class TeacherActivity extends AppCompatActivity implements View.OnClickLi
         channel = manager.initialize(this, getMainLooper(), null);
         broadCastReciver = new WifiRelatedBroadcastReciver(manager, channel, this, peerListListener);
 
+        try {
+            Method m = manager.getClass().getMethod("setDeviceName",
+                    WifiP2pManager.Channel.class, String.class, WifiP2pManager.ActionListener.class);
+            m.invoke(manager, channel, "Group 1", new WifiP2pManager.ActionListener() {
+                public void onSuccess() {
+                    //Code for Success in changing name
+                }
+
+                public void onFailure(int reason) {
+                    //Code to be done while name change Fails
+                }
+            });
+        } catch (NoSuchMethodException e) {
+            e.printStackTrace();
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+        } catch (InvocationTargetException e) {
+            e.printStackTrace();
+        }
+
         discoverPeersTillSuccess();
 
         manager.createGroup(channel, new WifiP2pManager.ActionListener() {
@@ -129,7 +151,7 @@ public class TeacherActivity extends AppCompatActivity implements View.OnClickLi
     private void setRecyclerView() {
         recyclerView.setAdapter(madapter);
         recyclerView.setLayoutManager(new GridLayoutManager(this, 2));
-        madapter.setattendence(me.getattendence(), me.getstatus());
+        madapter.setAttendance(me.getAttendance(), me.getstatus());
         madapter.notifyDataSetChanged();
     }
 
@@ -263,12 +285,11 @@ public class TeacherActivity extends AppCompatActivity implements View.OnClickLi
     }
 
     public void startListening() {
-        if(socket1.isCancelled()) {
+        if (socket1.isCancelled()) {
             socket1 = new ServerAsyncSocket(TeacherActivity.this, me);
             socket1.execute();
             me = socket1.getUpdatedExtractor();
-        }
-        else if(socket2.isCancelled()){
+        } else if (socket2.isCancelled()) {
             socket2 = new ServerAsyncSocket(TeacherActivity.this, me);
             socket2.execute();
             me = socket2.getUpdatedExtractor();

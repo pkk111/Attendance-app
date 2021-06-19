@@ -1,14 +1,17 @@
 # Attandence-app
 
-**Version 1.2.0**
+**Version 1.4.0**
 
-This app is to take attendence during class and is made in android studios.
+This app is to take attendance during class and is made in android studios.
 
-It works on the wifi-hotspot feature on android devices.
+It works on the Wifi feature of android devices.
 
-It ensures that one student can only mark one attendence as the teacher's side app keeps the record of the ip address of the phones who are requesting to mark attendence.
+It ensures that one student can only mark one attendance as the teacher's side app keeps the record of the ip address of the phones who are requesting to mark attendance.
 
-This app can also be used to take attendence at various other organisations and companies.
+This app can also be used to take attendance at various other organisations and companies.
+
+It detects nearby devices groups and show it to user, User can then choose the group and his device will form a Wifi connection to the host device(Teacher's device),
+after that user can mark his attendance by clicking on the absent button and entering his attendance when asked.
  
 Future Goals
 --

@@ -8,6 +8,7 @@ import android.net.wifi.WifiManager;
 import android.net.wifi.p2p.WifiP2pDeviceList;
 import android.net.wifi.p2p.WifiP2pInfo;
 import android.net.wifi.p2p.WifiP2pManager;
+import android.util.Log;
 
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -63,7 +64,7 @@ public class WifiRelatedBroadcastReciver extends BroadcastReceiver {
 
                         if (wifiP2pInfo.groupFormed && wifiP2pInfo.isGroupOwner) {
                             //Group owner code
-                            Utils.showShortToast(context, "Someone joined");
+                            Log.d("Connection formed", "The device is the group owner");
                         }
                         else if (wifiP2pInfo.groupFormed) {
                             // Client Side Code goes here

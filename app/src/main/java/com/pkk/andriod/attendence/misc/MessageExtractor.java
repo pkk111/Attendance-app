@@ -59,7 +59,7 @@ public class MessageExtractor {
         return false;
     }
 
-    public static List<Integer> getattendence() {
+    public static List<Integer> getAttendance() {
         return roll;
     }
 
@@ -77,7 +77,7 @@ public class MessageExtractor {
         return Color.rgb(220, 20, 60);
     }
 
-    public static String getattendence(Boolean bool) {
+    public static String getAttendance(Boolean bool) {
         if (bool)
             return "Present";
         return "Absent";
