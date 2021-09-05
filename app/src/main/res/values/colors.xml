@@ -1,9 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="colorPrimary">#008577</color>
-    <color name="colorPrimaryDark">#00574B</color>
-    <color name="colorAccent">#D81B60</color>
     <color name="login_button_background">#FFFFFF</color>
     <color name="black">#000000</color>
     <color name="fab_button_color">#0088DF</color>
+    <color name="present_color">#5ACD3C</color>
+    <color name="absent_color">#DC143C</color>
+    <color name="white">#FFFFFF</color>
+
+    <color name="pulselayout_backgroundcolor">#1E90FF</color>
+    <color name="pulsecolor">#ffffff</color>
+    <color name="transparent">#00FFFFFF</color>
+    <color name="blue">#0000FF</color>
 </resources>

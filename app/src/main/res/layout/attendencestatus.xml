@@ -10,7 +10,6 @@
         appNs:cardElevation="10dp"
         android:layout_margin="5dp"
         android:id="@+id/notification_background"
-        appNs:cardBackgroundColor="@color/colorPrimary"
         appNs:cardCornerRadius="15dp">
 
         <LinearLayout
@@ -37,20 +36,20 @@
                     android:id="@+id/status"
                     android:layout_height="wrap_content"
                     android:layout_width="wrap_content"
-                    android:textSize="20dp"
+                    android:textSize="20sp"
                     android:text="@string/attendence_status"
                     android:textStyle="italic"
                     appNs:layout_constraintStart_toStartOf="parent"
                     appNs:layout_constraintBottom_toBottomOf="parent"/>
 
-                <Switch
+                <com.google.android.material.switchmaterial.SwitchMaterial
                     android:id="@+id/status_switch"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginEnd="8dp"
                     android:layout_marginRight="8dp"
                     appNs:layout_constraintEnd_toEndOf="parent"
-                    appNs:layout_constraintBottom_toBottomOf="parent"/>
+                    appNs:layout_constraintBottom_toBottomOf="parent" />
             </androidx.constraintlayout.widget.ConstraintLayout>
 
         </LinearLayout>

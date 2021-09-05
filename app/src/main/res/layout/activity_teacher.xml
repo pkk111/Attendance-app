@@ -1,12 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@drawable/background_lightblue"
-    tools:context=".activity.TeacherActivity">
+    tools:context=".activities.TeacherActivity">
 
 
     <RelativeLayout
@@ -26,11 +25,11 @@
             android:background="@drawable/start_button_background"
             android:paddingHorizontal="24dp"
             android:paddingVertical="36dp"
-            android:text="START"
+            android:text="@string/start"
             android:textSize="24sp" />
 
         <ScrollView
-            android:id="@+id/scroolview"
+            android:id="@+id/scrollview"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_below="@id/btn_receiving"
@@ -49,7 +48,7 @@
             android:id="@+id/recycler_view"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_below="@id/scroolview"
+            android:layout_below="@id/scrollview"
             android:layout_marginTop="10dp">
 
         </androidx.recyclerview.widget.RecyclerView>
@@ -61,39 +60,40 @@
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
         android:orientation="vertical"
-        app:layout_constraintGuide_percent="0.8"/>
+        app:layout_constraintGuide_percent="0.8" />
 
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/refresh"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:src="@drawable/ic_refresh_arrow"
         android:layout_marginVertical="30dp"
-        android:scaleType="center"
-        android:tint="#FFFFFF"
         android:backgroundTint="@color/fab_button_color"
+        android:contentDescription="@string/refresh_roll_number_list"
+        android:padding="10dp"
+        android:scaleType="center"
+        android:src="@drawable/ic_refresh_arrow"
+        android:tint="@color/white"
         android:visibility="invisible"
-        app:borderWidth="0dp"
-        app:layout_constraintBottom_toTopOf="@+id/add_rollno"
-        app:layout_constraintLeft_toLeftOf="@+id/add_rollno"
-        app:layout_constraintRight_toRightOf="@+id/add_rollno"/>
-
+        app:layout_constraintBottom_toTopOf="@+id/add_roll_no"
+        app:layout_constraintLeft_toLeftOf="@+id/add_roll_no"
+        app:layout_constraintRight_toRightOf="@+id/add_roll_no" />
 
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
-        android:id="@+id/add_rollno"
+        android:id="@+id/add_roll_no"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:src="@drawable/ic_add"
         android:layout_marginHorizontal="10dp"
         android:layout_marginVertical="30dp"
-        android:scaleType="center"
-        android:tint="#FFFFFF"
         android:backgroundTint="@color/fab_button_color"
+        android:contentDescription="@string/add_new_roll_number"
+        android:scaleType="center"
+        android:src="@drawable/ic_add"
+        android:tint="#FFFFFF"
         android:visibility="invisible"
         app:borderWidth="0dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintLeft_toLeftOf="@+id/teacher_fab_left_guidline"
-        app:layout_constraintRight_toRightOf="parent"/>
+        app:layout_constraintRight_toRightOf="parent" />
 </androidx.constraintlayout.widget.ConstraintLayout>

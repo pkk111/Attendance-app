@@ -1,54 +1,64 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/layout"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
+    android:layout_height="wrap_content"
     android:orientation="vertical">
 
-    <LinearLayout
-        android:layout_width="match_parent"
+    <TextView
+        android:id="@+id/starting_roll_no_text"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:orientation="horizontal">
+        android:layout_margin="10dp"
+        android:padding="5dp"
+        android:text="@string/start_label"
+        android:textColor="@color/black"
+        android:textSize="18sp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_margin="10dp"
-            android:padding="5dp"
-            android:text="Start : "
-            android:textColor="@color/black"
-            android:textSize="18sp" />
-
-        <EditText
-            android:id="@+id/start"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_margin="10dp"
-            android:inputType="number"
-            android:padding="5dp" />
-    </LinearLayout>
-
-    <LinearLayout
-        android:layout_width="match_parent"
+    <EditText
+        android:id="@+id/start"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:orientation="horizontal">
+        android:layout_marginVertical="10dp"
+        android:layout_marginStart="30dp"
+        android:layout_marginLeft="30dp"
+        android:layout_marginEnd="20dp"
+        android:layout_marginRight="20dp"
+        android:autofillHints="number"
+        android:hint="@string/starting_roll_no"
+        android:inputType="number"
+        android:padding="5dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@id/starting_roll_no_text"
+        app:layout_constraintTop_toTopOf="parent" />
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_margin="10dp"
-            android:padding="5dp"
-            android:text="End : "
-            android:textColor="@color/black"
-            android:textSize="18sp" />
+    <TextView
+        android:id="@+id/ending_roll_no_text"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="10dp"
+        android:padding="5dp"
+        android:text="@string/end_label"
+        android:textColor="@color/black"
+        android:textSize="18sp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@id/end" />
 
-        <EditText
-            android:id="@+id/end"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_margin="10dp"
-            android:inputType="number"
-            android:padding="5dp" />
-    </LinearLayout>
+    <EditText
+        android:id="@+id/end"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginVertical="10dp"
+        android:autofillHints="number"
+        android:hint="@string/ending_roll_no"
+        android:inputType="number"
+        android:padding="5dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="@id/start"
+        app:layout_constraintStart_toStartOf="@id/start"
+        app:layout_constraintTop_toBottomOf="@+id/start" />
 
-</LinearLayout>
+</androidx.constraintlayout.widget.ConstraintLayout>

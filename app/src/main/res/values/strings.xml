@@ -10,8 +10,27 @@
         <item>Student</item>
         <item>Teacher</item>
     </string-array>
-    <!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="cancel">Cancel</string>
     <string name="absent">Absent</string>
+    <string name="send">Send</string>
+    <string name="enter_message">Enter message</string>
+    <string name="admin_powers">Admin powers</string>
+    <string name="stop">Stop</string>
+    <string name="start">Start</string>
+    <string name="file_preference">com.pkk.android.attendence.FILE_PREFERENCE_KEY</string>
+    <string name="present_marked">Present \n Marked</string>
+    <string name="title_activity_teacher2">TeacherActivity2</string>
+    <string name="tab_text_1">Tab 1</string>
+    <string name="tab_text_2">Tab 2</string>
+    <string name="user_avatar">user avatar</string>
+    <string name="way_to_take_attendance">way to take attendance</string>
+    <string name="way_to_mark_attendance">way to mark attendance</string>
+    <string name="refresh_roll_number_list">Refresh Roll No. List</string>
+    <string name="add_new_roll_number">Add New Roll Number</string>
+    <string name="end_label">End :</string>
+    <string name="start_label">Start :</string>
+    <string name="ending_roll_no">Ending Roll Number</string>
+    <string name="starting_roll_no">Starting Roll Number</string>
+    <string name="roll_no_label">Roll No :</string>
+    <string name="enter_roll_number">Enter Roll Number</string>
 </resources>

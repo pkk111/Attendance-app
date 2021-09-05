@@ -5,10 +5,24 @@
         <!-- Customize your theme here. -->
         <item name="windowActionBar">false</item>
         <item name="windowNoTitle">true</item>
-        <item name="colorPrimary">@color/colorPrimary</item>
-        <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
-        <item name="colorAccent">@color/colorAccent</item>
     </style>
 
+    <declare-styleable name="PulseStyle">
+        <attr name="pulse_count" format="integer" />
+        <attr name="pulse_duration" format="integer" />
+        <attr name="pulse_color" format="color" />
+        <attr name="pulse_repeat" format="enum|integer">
+            <enum name="INFINITE" value="-1" />
+            <enum name="NEVER" value="0" />
+        </attr>
+        <attr name="pulse_maxScale" format="float" />
+        <attr name="pulse_startFromScratch" format="boolean" />
+        <attr name="pulse_interpolator" format="enum">
+            <enum name="Linear" value="0" />
+            <enum name="Accelerate" value="1" />
+            <enum name="Decelerate" value="2" />
+            <enum name="AccelerateDecelerate" value="3" />
+        </attr>
+    </declare-styleable>
 
 </resources>

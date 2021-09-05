@@ -4,7 +4,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    tools:context=".activity.LoginActivity"
+    tools:context=".activities.LoginActivity"
     android:background="@drawable/background_lightblue">
 
     <androidx.constraintlayout.widget.Guideline
@@ -39,7 +39,7 @@
         android:id="@+id/student_login_card"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        app:cardCornerRadius="150dp"
+        app:cardCornerRadius="80dp"
         app:cardElevation="8dp"
         app:cardBackgroundColor="@color/login_button_background"
         app:layout_constraintTop_toTopOf="@id/login_guideline_student_top"
@@ -49,20 +49,21 @@
         app:layout_constraintDimensionRatio="1:1">
 
         <ImageButton
-            android:id="@+id/student_login"
+            android:id="@+id/studentLogin"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textSize="24sp"
             android:textAllCaps="true"
             android:padding="50dp"
-            android:background="@drawable/ic_student" />
+            android:background="@drawable/ic_student"
+            android:contentDescription="@string/way_to_mark_attendance" />
     </androidx.cardview.widget.CardView>
 
     <androidx.cardview.widget.CardView
         android:id="@+id/teacher_login_card"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        app:cardCornerRadius="150dp"
+        app:cardCornerRadius="100dp"
         app:cardElevation="8dp"
         app:cardBackgroundColor="@color/login_button_background"
         app:layout_constraintTop_toTopOf="@+id/login_guideline_teacher_top"
@@ -72,14 +73,15 @@
         app:layout_constraintDimensionRatio="1:1">
 
         <ImageButton
-            android:id="@+id/teacher_login"
+            android:id="@+id/teacherLogin"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/teacher"
             android:textSize="24sp"
             android:textAllCaps="true"
             android:padding="50dp"
-            android:background="@drawable/ic_teacher" />
+            android:background="@drawable/ic_teacher"
+            android:contentDescription="@string/way_to_take_attendance" />
 
     </androidx.cardview.widget.CardView>
 
