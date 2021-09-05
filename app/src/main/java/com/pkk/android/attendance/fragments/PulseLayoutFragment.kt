@@ -4,7 +4,6 @@ import android.content.Context
 import android.graphics.Color
 import android.os.Build
 import android.os.Bundle
-import android.util.TypedValue
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -17,6 +16,7 @@ import com.pkk.android.attendance.interfaces.*
 import com.pkk.android.attendance.misc.CentralVariables
 import com.pkk.android.attendance.misc.SharedPref
 import com.pkk.android.attendance.misc.Utils
+import com.pkk.android.attendance.misc.Utils.Companion.toDp
 import com.pkk.android.attendance.models.DeviceModel
 import kotlinx.android.synthetic.main.fragment_pulse_layout.*
 
@@ -175,14 +175,6 @@ class PulseLayoutFragment : Fragment(), PayloadCallbackListener, ConnectionEstab
 
     private fun setName(displayName: String?) {
         requireActivity().runOnUiThread { name.text = displayName }
-    }
-
-    fun Int.toDp(context: Context): Float {
-        return TypedValue.applyDimension(
-            TypedValue.COMPLEX_UNIT_DIP,
-            this.toFloat(),
-            context.resources.displayMetrics
-        )
     }
 
     companion object {

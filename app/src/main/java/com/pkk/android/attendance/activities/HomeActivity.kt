@@ -11,10 +11,11 @@ import androidx.core.content.ContextCompat
 import com.pkk.android.attendance.R
 import com.pkk.android.attendance.misc.CentralVariables.student
 import com.pkk.android.attendance.misc.CentralVariables.teacher
+import com.pkk.android.attendance.misc.Utils.Companion.toDp
 import kotlinx.android.synthetic.main.activity_login.*
 import java.util.*
 
-class LoginActivity : AppCompatActivity() {
+class HomeActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -23,6 +24,12 @@ class LoginActivity : AppCompatActivity() {
     }
 
     private fun initialize() {
+        var height = student_login_card.resources.configuration.screenHeightDp
+        var width = student_login_card.resources.configuration.screenWidthDp
+        student_login_card.radius = (height.coerceAtMost(width) * 0.5).toInt().toDp(this)
+        height = teacher_login_card.resources.configuration.screenHeightDp
+        width = teacher_login_card.resources.configuration.screenWidthDp
+        teacher_login_card.radius = (height.coerceAtMost(width) * 0.5).toInt().toDp(this)
         studentLogin.setOnClickListener { studentLogin() }
         teacherLogin.setOnClickListener { teacherLogin() }
     }

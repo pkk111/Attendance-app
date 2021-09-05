@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.res.Resources
 import android.graphics.drawable.Drawable
 import android.os.Build
+import android.util.TypedValue
 import android.widget.Toast
 
 class Utils {
@@ -41,6 +42,14 @@ class Utils {
             } else {
                 context.resources.getDrawable(drawable)
             }
+        }
+
+        fun Int.toDp(context: Context): Float {
+            return TypedValue.applyDimension(
+                TypedValue.COMPLEX_UNIT_DIP,
+                this.toFloat(),
+                context.resources.displayMetrics
+            )
         }
     }
 }

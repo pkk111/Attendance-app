@@ -11,6 +11,7 @@
         <entry key="app/src/main/res/drawable/ic_arrow.xml" value="0.1814814814814815" />
         <entry key="app/src/main/res/drawable/selector_background.xml" value="0.16666666666666666" />
         <entry key="app/src/main/res/layout-v21/activity_teacher.xml" value="0.1" />
+        <entry key="app/src/main/res/layout/activity_login.xml" value="0.1" />
         <entry key="app/src/main/res/layout/activity_teacher.xml" value="0.1" />
         <entry key="app/src/main/res/layout/alert_label_editor.xml" value="0.1" />
         <entry key="app/src/main/res/layout/fragment_pulse_layout.xml" value="0.1" />

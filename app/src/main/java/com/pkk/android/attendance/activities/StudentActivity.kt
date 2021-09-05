@@ -137,7 +137,7 @@ class StudentActivity : AppCompatActivity(), View.OnClickListener, PassDataListe
 
     override fun onBackPressed() {
         if (supportFragmentManager.findFragmentById(R.id.empty_layout) == null)
-            startActivity(Intent(this, LoginActivity::class.java))
+            startActivity(Intent(this, HomeActivity::class.java))
         super.onBackPressed()
     }
 

@@ -149,7 +149,7 @@ class TeacherActivity : AppCompatActivity(), View.OnClickListener, PayloadCallba
     }
 
     override fun onBackPressed() {
-        startActivity(Intent(this, LoginActivity::class.java))
+        startActivity(Intent(this, HomeActivity::class.java))
         super.onBackPressed()
     }
 }
