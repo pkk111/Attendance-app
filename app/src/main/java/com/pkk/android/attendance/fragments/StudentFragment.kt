@@ -1,42 +1,71 @@
-package com.pkk.android.attendance.activities
+package com.pkk.android.attendance.fragments
 
+import android.Manifest
 import android.app.AlertDialog
-import android.content.Intent
 import android.os.Bundle
 import android.text.InputType
 import android.util.Log
+import android.view.LayoutInflater
 import android.view.View
+import android.view.ViewGroup
 import android.widget.EditText
-import androidx.appcompat.app.AppCompatActivity
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.view.setPadding
+import androidx.fragment.app.Fragment
 import com.google.gson.Gson
 import com.pkk.android.attendance.R
-import com.pkk.android.attendance.fragments.PulseLayoutFragment
-import com.pkk.android.attendance.interfaces.PassDataListener
-import com.pkk.android.attendance.misc.Utils.Companion.showShortToast
+import com.pkk.android.attendance.misc.CentralVariables
+import com.pkk.android.attendance.misc.Utils
 import com.pkk.android.attendance.models.MessageCodes
 import com.pkk.android.attendance.models.MessageModel
-import kotlinx.android.synthetic.main.activity_student.*
+import kotlinx.android.synthetic.main.fragment_student.*
 import java.net.Inet4Address
 import java.net.NetworkInterface
 import java.net.SocketException
 
-class StudentActivity : AppCompatActivity(), View.OnClickListener, PassDataListener {
+class StudentFragment : Fragment(), View.OnClickListener {
+
     private var rollNo: String? = null
     private var gson: Gson? = null
     private var message: String? = null
 
+    private val requestPermissionLauncher =
+        registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { permissions ->
+            permissions.entries.forEach {
+                val isGranted = it.value
+                if (isGranted) {
+                    openFragment()
+                }
+            }
+        }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_student)
+        requireActivity().supportFragmentManager.setFragmentResultListener(
+            CentralVariables.KEY_FRAGMENT_MESSAGE_KEY,
+            this
+        ) { _, bundle ->
+            updateUI(bundle.getString("message"))
+        }
+    }
+
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View? {
+        return inflater.inflate(R.layout.fragment_student, container, false)
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
         initialise()
     }
 
     private fun initialise() {
-        status!!.setOnClickListener(this)
+        attendanceStatus!!.setOnClickListener(this)
         buttonSend.setOnClickListener(this)
         gson = Gson()
-
     }
 
     override fun onClick(v: View) {
@@ -44,14 +73,14 @@ class StudentActivity : AppCompatActivity(), View.OnClickListener, PassDataListe
             R.id.buttonSend -> {
                 val m = MessageModel(MessageCodes.CUSTOM, sendMessageEditText!!.text.toString())
                 message = gson!!.toJson(m)
-                openFragment()
+                requestPermission()
             }
-            R.id.status -> {
-                val builder = AlertDialog.Builder(this)
+            R.id.attendanceStatus -> {
+                val builder = AlertDialog.Builder(requireContext())
                 builder.setTitle("Enter Your Roll No")
 
                 // Set up the input
-                val input = EditText(this)
+                val input = EditText(requireContext())
                 input.inputType = InputType.TYPE_CLASS_NUMBER
                 input.setPadding(20)
                 builder.setView(input)
@@ -65,8 +94,11 @@ class StudentActivity : AppCompatActivity(), View.OnClickListener, PassDataListe
                         model.isPresent = true
                         model.ip = localIpAddress
                         message = gson!!.toJson(model)
-                        openFragment()
-                    } else showShortToast(this, "Enter Roll No to mark your attendance")
+                        requestPermission()
+                    } else Utils.showShortToast(
+                        requireContext(),
+                        "Enter Roll No to mark your attendance"
+                    )
                 }
                 builder.setNegativeButton("Cancel") { dialog, _ -> dialog.cancel() }
                 builder.show()
@@ -74,10 +106,20 @@ class StudentActivity : AppCompatActivity(), View.OnClickListener, PassDataListe
         }
     }
 
+    private fun requestPermission() {
+        requestPermissionLauncher.launch(arrayOf(Manifest.permission.ACCESS_FINE_LOCATION))
+    }
+
     private fun openFragment() {
         try {
-            supportFragmentManager.beginTransaction()
-                .replace(R.id.empty_layout, PulseLayoutFragment.newInstance(message))
+            val ft = requireActivity().supportFragmentManager.beginTransaction()
+            ft.setCustomAnimations(
+                R.anim.slide_in_from_top_left,
+                R.anim.slide_out_to_top_left,
+                R.anim.slide_in_from_top_left,
+                R.anim.slide_out_to_top_left
+            )
+            ft.replace(R.id.empty_layout, PulseLayoutFragment.newInstance(message))
                 .addToBackStack(null).commit()
         } catch (e: Exception) {
             Log.e("error", "exception is $e")
@@ -88,9 +130,9 @@ class StudentActivity : AppCompatActivity(), View.OnClickListener, PassDataListe
         val model = gson!!.fromJson(message, MessageModel::class.java)
         when (model.messageCodes) {
             MessageCodes.NORMAL -> {
-                status!!.text = getString(R.string.present_marked)
-                status!!.isClickable = false
-                status!!.setBackgroundResource(R.drawable.start_button_background)
+                attendanceStatus!!.text = getString(R.string.present_marked)
+                attendanceStatus!!.isClickable = false
+                attendanceStatus!!.setBackgroundResource(R.drawable.start_button_background)
             }
             MessageCodes.CUSTOM -> {
                 val s = replyFromServerTextView!!.text.toString()
@@ -103,13 +145,14 @@ class StudentActivity : AppCompatActivity(), View.OnClickListener, PassDataListe
                     )
                 )
             }
-            else -> showShortToast(
-                this, model.messageCodes.message
+            else -> Utils.showShortToast(
+                requireContext(), model.messageCodes.message
             )
         }
     }
 
     companion object {
+
         val localIpAddress: String?
             get() {
                 try {
@@ -129,16 +172,12 @@ class StudentActivity : AppCompatActivity(), View.OnClickListener, PassDataListe
                 }
                 return null
             }
-    }
 
-    override fun passData(string: String?) {
-        updateUI(string)
+        @JvmStatic
+        fun newInstance() =
+            StudentFragment().apply {
+                arguments = Bundle().apply {
+                }
+            }
     }
-
-    override fun onBackPressed() {
-        if (supportFragmentManager.findFragmentById(R.id.empty_layout) == null)
-            startActivity(Intent(this, HomeActivity::class.java))
-        super.onBackPressed()
-    }
-
 }

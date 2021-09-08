@@ -1,6 +1,5 @@
 package com.pkk.android.attendance.fragments
 
-import android.content.Context
 import android.graphics.Color
 import android.os.Build
 import android.os.Bundle
@@ -9,10 +8,14 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.LinearLayout
 import androidx.cardview.widget.CardView
+import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 import com.pkk.android.attendance.R
 import com.pkk.android.attendance.connectionSetup.Discoverer
-import com.pkk.android.attendance.interfaces.*
+import com.pkk.android.attendance.interfaces.ConnectionCallbackListener
+import com.pkk.android.attendance.interfaces.ConnectionEstablishedListener
+import com.pkk.android.attendance.interfaces.DeviceSelectedListener
+import com.pkk.android.attendance.interfaces.PayloadCallbackListener
 import com.pkk.android.attendance.misc.CentralVariables
 import com.pkk.android.attendance.misc.SharedPref
 import com.pkk.android.attendance.misc.Utils
@@ -25,16 +28,10 @@ class PulseLayoutFragment : Fragment(), PayloadCallbackListener, ConnectionEstab
 
     private var discoverer: Discoverer? = null
     private var message: String? = null
-    private var passDataListener: PassDataListener? = null
     private var card: CardView? = null
     private var height: Int = 0
     private var width: Int = 0
     private var radius: Float = 0f
-
-    override fun onAttach(context: Context) {
-        passDataListener = context as PassDataListener
-        super.onAttach(context)
-    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -53,11 +50,12 @@ class PulseLayoutFragment : Fragment(), PayloadCallbackListener, ConnectionEstab
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        toolbar.setNavigationOnClickListener { requireActivity().supportFragmentManager.popBackStack() }
+        toolbar.setNavigationOnClickListener { closeCurrentFragment() }
 
         setBackgroundCard()
         searchNearbyDevices()
         setName(SharedPref.getString(requireContext(), CentralVariables.KEY_HOST_NAME))
+        setPic(SharedPref.getInt(requireContext(), CentralVariables.KEY_PROFILE_PIC))
         //Start Animation
         startPulse()
     }
@@ -70,12 +68,8 @@ class PulseLayoutFragment : Fragment(), PayloadCallbackListener, ConnectionEstab
             width = resources.displayMetrics.widthPixels
             radius = width.coerceAtMost(height) * 0.5f
 
-            val cardHeight = (height / 2 + radius * 3).toInt()
+            val cardHeight = (height / 2 + radius * 2.75).toInt()
             val cardWidth = (width + radius).toInt()
-
-            height = resources.configuration.screenHeightDp
-            width = resources.configuration.screenWidthDp
-
 
             card = CardView(requireContext())
             card!!.layoutParams = LinearLayout.LayoutParams(cardWidth, cardHeight)
@@ -87,6 +81,8 @@ class PulseLayoutFragment : Fragment(), PayloadCallbackListener, ConnectionEstab
             card!!.layoutParams.width = cardWidth
             card!!.elevation = 0f
 
+            height = resources.configuration.screenHeightDp
+            width = resources.configuration.screenWidthDp
             radius = width.coerceAtMost(height) * 0.5f
 
             card!!.radius = (radius * 1.5f).toInt().toDp(requireContext())
@@ -111,29 +107,14 @@ class PulseLayoutFragment : Fragment(), PayloadCallbackListener, ConnectionEstab
     private fun searchNearbyDevices() {
         pulsator!!.start()
         pulsator!!.setColor(0)
-        pulsator!!.setAvatars(getAvatars())
+        pulsator!!.setAvatars(Utils.getAvatars())
         pulsator!!.setListener(this)
         discoverer = Discoverer(requireActivity(), this, this)
         discoverer!!.startDiscovering(this)
     }
 
-    private fun getAvatars(): ArrayList<Int> {
-        return ArrayList(
-            listOf(
-                R.drawable.icon1,
-                R.drawable.icon2,
-                R.drawable.icon3,
-                R.drawable.icon4,
-                R.drawable.icon5,
-                R.drawable.icon6,
-                R.drawable.icon7,
-                R.drawable.icon8,
-                R.drawable.icon9,
-                R.drawable.icon10,
-                R.drawable.icon11,
-                R.drawable.icon12
-            )
-        )
+    private fun closeCurrentFragment() {
+        requireActivity().supportFragmentManager.popBackStack()
     }
 
     override fun onDeviceDetected(device: DeviceModel) {
@@ -153,10 +134,11 @@ class PulseLayoutFragment : Fragment(), PayloadCallbackListener, ConnectionEstab
     }
 
     override fun onPayloadReceived(message: String?, endpointId: String?) {
-        if (passDataListener != null) {
-            passDataListener!!.passData(message)
-            requireActivity().supportFragmentManager.popBackStack()
-        }
+        requireActivity().supportFragmentManager.setFragmentResult(
+            CentralVariables.KEY_FRAGMENT_MESSAGE_KEY,
+            bundleOf("message" to message)
+        )
+        closeCurrentFragment()
     }
 
     override fun onDestroyView() {
@@ -175,6 +157,15 @@ class PulseLayoutFragment : Fragment(), PayloadCallbackListener, ConnectionEstab
 
     private fun setName(displayName: String?) {
         requireActivity().runOnUiThread { name.text = displayName }
+    }
+
+
+    private fun setPic(displayPic: Int) {
+        if (displayPic >= 0)
+            requireActivity().runOnUiThread {
+                pic.background =
+                    Utils.getDrawableFromResource(requireContext(), Utils.getAvatars()[displayPic])
+            }
     }
 
     companion object {

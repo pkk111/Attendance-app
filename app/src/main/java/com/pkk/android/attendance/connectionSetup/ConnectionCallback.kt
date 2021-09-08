@@ -2,6 +2,7 @@ package com.pkk.android.attendance.connectionSetup
 
 import android.content.Context
 import android.util.Log
+import com.google.android.gms.common.api.ApiException
 import com.google.android.gms.nearby.Nearby
 import com.google.android.gms.nearby.connection.*
 import com.pkk.android.attendance.interfaces.ConnectionCallbackListener
@@ -49,6 +50,9 @@ class ConnectionCallback(
             .requestConnection(localUserName, device.endpointID, connectionLifecycleCallback)
             .addOnSuccessListener { Log.d("CONNECTION", "Connection requested successfully") }
             .addOnFailureListener { e: Exception ->
+                if ((e as ApiException).statusCode == 3) {
+                    //TODO code to handled already connected mode
+                }
                 listeners.onConnectionErrorOccurred(
                     "Error in requesting connection",
                     e
@@ -89,8 +93,10 @@ class ConnectionCallback(
             }
 
             override fun onDisconnected(endpointId: String) {
-                names!!.remove(endpointId)
-                listeners.onConnectionDisconnected(endpointId)
+                if (names!!.containsKey(endpointId)) {
+                    names!!.remove(endpointId)
+                    listeners.onConnectionDisconnected(endpointId)
+                }
             }
         }
 

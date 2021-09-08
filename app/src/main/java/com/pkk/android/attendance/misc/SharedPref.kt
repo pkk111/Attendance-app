@@ -7,14 +7,22 @@ import com.pkk.android.attendance.R
 
 class SharedPref {
 
-    fun set(context: Context, key: String?, value: String?) {
-        getEditor(context).putString(key, value)
-    }
-
     companion object {
-        @JvmStatic
+
+        fun setString(context: Context, key: String, value: String) {
+            getEditor(context).putString(key, value)
+        }
+
+        fun setInt(context: Context, key: String, value: Int) {
+            getEditor(context).putInt(key, value)
+        }
+
         fun getString(context: Context, key: String?, def: String = ""): String? {
             return getSharedPreference(context).getString(key, def)
+        }
+
+        fun getInt(context: Context, key: String, def: Int = -1): Int {
+            return getSharedPreference(context).getInt(key, def)
         }
 
         private fun getSharedPreference(context: Context): SharedPreferences {
@@ -23,13 +31,14 @@ class SharedPref {
                 Context.MODE_PRIVATE
             )
         }
-    }
 
-    private fun getEditor(context: Context): SharedPreferences.Editor {
-        return getSharedPreference(context).edit()
-    }
+        private fun getEditor(context: Context): SharedPreferences.Editor {
+            return getSharedPreference(context).edit()
+        }
 
-    fun clearPrefs(activity: Activity) {
-        getEditor(activity).clear().apply()
+        fun clearPrefs(activity: Activity) {
+            getEditor(activity).clear().apply()
+        }
+
     }
 }

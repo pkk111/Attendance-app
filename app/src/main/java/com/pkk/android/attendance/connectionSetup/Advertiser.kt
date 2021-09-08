@@ -13,11 +13,10 @@ import com.pkk.android.attendance.misc.CentralVariables.STRATEGY
 import com.pkk.android.attendance.misc.SharedPref.Companion.getString
 import com.pkk.android.attendance.misc.Utils.Companion.showShortToast
 import com.pkk.android.attendance.models.DeviceModel
-import java.util.*
 
 class Advertiser(private val activity: Activity) : ConnectionStatusListeners {
 
-    private val endpoints: MutableList<DeviceModel>
+    private val endpoints: HashMap<String, String?> = HashMap()
     private var connectionCallback: ConnectionCallback? = null
     private val hostUsername: String?
         get() = getString(activity, CentralVariables.KEY_HOST_NAME, "")
@@ -48,7 +47,7 @@ class Advertiser(private val activity: Activity) : ConnectionStatusListeners {
     }
 
     override fun onConnectionEstablished(device: DeviceModel) {
-        endpoints.add(device)
+        endpoints[device.endpointID] = device.deviceName
     }
 
     override fun onConnectionErrorOccurred(part: String, e: Exception) {
@@ -57,14 +56,12 @@ class Advertiser(private val activity: Activity) : ConnectionStatusListeners {
     }
 
     override fun onConnectionDisconnected(endpoint: String) {
-        for (x in endpoints)
-            if (x.endpointID == endpoint) {
-                endpoints.remove(x)
-                break
-            }
+        endpoints.remove(endpoint)
     }
 
-    init {
-        endpoints = ArrayList()
+    fun disconnect(endpoint: String) {
+        Nearby.getConnectionsClient(activity).disconnectFromEndpoint(endpoint)
+        endpoints.remove(endpoint)
     }
+
 }

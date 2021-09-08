@@ -11,4 +11,6 @@ object CentralVariables {
     const val teacher = 2
     const val KEY_DISCOVERER_NAME = "discoverer_name"
     const val KEY_HOST_NAME = "host_name"
+    const val KEY_PROFILE_PIC = "profile_pic"
+    const val KEY_FRAGMENT_MESSAGE_KEY = "message transfer key"
 }

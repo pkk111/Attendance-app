@@ -76,6 +76,7 @@ class MessageExtractor(start: Int, end: Int) {
     }
 
     init {
+        Companion.students.clear()
         for (x in start..end) {
             Companion.students.add(Student(x))
         }

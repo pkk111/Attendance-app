@@ -1,5 +1,6 @@
 <resources>
     <string name="app_name">Attendance</string>
+    <string name="toast_message">Toast message</string>
     <string name="rollnumber">Roll No.</string>
     <string name="attendence_status">Status</string>
     <string name="username">Username</string>
@@ -33,4 +34,7 @@
     <string name="starting_roll_no">Starting Roll Number</string>
     <string name="roll_no_label">Roll No :</string>
     <string name="enter_roll_number">Enter Roll Number</string>
+    <string name="feedback">Feedback</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
 </resources>

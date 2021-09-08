@@ -110,7 +110,7 @@ class PulseLayout @JvmOverloads constructor(
         val toDegree = (getRandomCoordinatesInPercentage() / 100f) * (2 * Math.PI)
         val radi = getRandomRadius()
         val corX = (centerX + cos(toDegree) * regions[radi]!!).toFloat()
-        val corY = (centerX + sin(toDegree) * regions[radi]!!).toFloat()
+        val corY = (centerY + sin(toDegree) * regions[radi]!!).toFloat()
         addImageview(corX, corY, device)
     }
 
@@ -144,8 +144,8 @@ class PulseLayout @JvmOverloads constructor(
 
             //Profile Image
             params = LayoutParams(
-                resources.getDimension(R.dimen.fourtyeight).toInt(),
-                resources.getDimension(R.dimen.fourtyeight).toInt()
+                resources.getDimension(R.dimen.forty_eight).toInt(),
+                resources.getDimension(R.dimen.forty_eight).toInt()
             )
             val avatar = ImageView(context)
             avatar.layoutParams = params

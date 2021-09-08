@@ -32,6 +32,7 @@ class AttendanceMarker(
         val output = MessageModel()
         if (m.messageCodes == MessageCodes.CUSTOM) {
             passDataListener.passData(m.message)
+            output.messageCodes = MessageCodes.CUSTOM
         } else if (m.messageCodes == MessageCodes.NORMAL) {
             //Validating the incoming message
             if (messageExtractor.validateRollNo(m.rollNo)) {

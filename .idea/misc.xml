@@ -8,14 +8,31 @@
   <component name="DesignSurface">
     <option name="filePathToZoomLevelMap">
       <map>
+        <entry key="app/src/main/res/drawable/c_check_white_24dp.xml" value="0.1648148148148148" />
+        <entry key="app/src/main/res/drawable/circular_shape.xml" value="0.15462962962962962" />
         <entry key="app/src/main/res/drawable/ic_arrow.xml" value="0.1814814814814815" />
+        <entry key="app/src/main/res/drawable/ic_clear_white_24dp.xml" value="0.1648148148148148" />
+        <entry key="app/src/main/res/drawable/ic_error_outline_white_24dp.xml" value="0.1648148148148148" />
+        <entry key="app/src/main/res/drawable/ic_feedback.xml" value="0.1675925925925926" />
+        <entry key="app/src/main/res/drawable/ic_feedback_fill.xml" value="0.10520833333333333" />
+        <entry key="app/src/main/res/drawable/ic_feedback_monocolor.xml" value="0.7708333333333334" />
+        <entry key="app/src/main/res/drawable/ic_feedback_outline.xml" value="0.1712962962962963" />
+        <entry key="app/src/main/res/drawable/ic_info_outline_white_24dp.xml" value="0.1648148148148148" />
+        <entry key="app/src/main/res/drawable/ic_student.xml" value="0.15462962962962962" />
+        <entry key="app/src/main/res/drawable/ic_teacher.xml" value="0.15833333333333333" />
         <entry key="app/src/main/res/drawable/selector_background.xml" value="0.16666666666666666" />
+        <entry key="app/src/main/res/drawable/white_disc_with_shadow.xml" value="0.15462962962962962" />
         <entry key="app/src/main/res/layout-v21/activity_teacher.xml" value="0.1" />
         <entry key="app/src/main/res/layout/activity_login.xml" value="0.1" />
+        <entry key="app/src/main/res/layout/activity_main.xml" value="0.12182971014492754" />
         <entry key="app/src/main/res/layout/activity_teacher.xml" value="0.1" />
         <entry key="app/src/main/res/layout/alert_label_editor.xml" value="0.1" />
+        <entry key="app/src/main/res/layout/fragment_home.xml" value="0.1" />
         <entry key="app/src/main/res/layout/fragment_pulse_layout.xml" value="0.1" />
+        <entry key="app/src/main/res/layout/fragment_student.xml" value="0.1" />
+        <entry key="app/src/main/res/layout/fragment_teacher.xml" value="0.12182971014492754" />
         <entry key="app/src/main/res/layout/layout_alert_dialog_add_roll_no.xml" value="0.1" />
+        <entry key="app/src/main/res/layout/toast_layout.xml" value="0.1" />
       </map>
     </option>
   </component>
