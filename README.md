@@ -17,26 +17,26 @@ attendance by clicking on the absent button and entering his attendance when ask
 
 Todo List
 --
-[x] UI make over
-[x] Migrate to Kotlin
-[x] Add Scanning feature to connect to the app
-[x] Conversion to Single Activity App
-[] A way to change profile pic and username
-[] New UI for all alert dialog boxes (For success, Error, In progress and Forms)
-[] Store Attendance in dbms
-[] Convert and class attendance to .xls
-[] Share Attendance of a class to other app
-[] Let Students store Attendance as per class name and see it in future
-[] Add backend for the app to store previous configurations of the user and a login to the app
-[] Feature to analise the previous attendance and give alerts for the variations in data of a
+- [x] UI make over
+- [x] Migrate to Kotlin
+- [x] Add Scanning feature to connect to the app
+- [x] Conversion to Single Activity App
+- [ ] A way to change profile pic and username
+- [ ] New UI for all alert dialog boxes (For success, Error, In progress and Forms)
+- [ ] Store Attendance in dbms
+- [ ] Convert and class attendance to .xls
+- [ ] Share Attendance of a class to other app
+- [ ] Let Students store Attendance as per class name and see it in future
+- [ ] Add backend for the app to store previous configurations of the user and a login to the app
+- [ ] Feature to analise the previous attendance and give alerts for the variations in data of a
 student attendance
 
 ### App Images
 
-!(home)(project_images/home.jpg)
-!(student)(project_images/student.jpg)
-!(searching)(project_images/searching.jpg)
-!(teacher)(project_images/teacher.jpg)
+![home](project_images/home.jpg)
+![student](project_images/student.jpg)
+![searching](project_images/searching.jpg)
+![teacher](project_images/teacher.jpg)
 
  ---
 
