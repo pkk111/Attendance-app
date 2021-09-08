@@ -15,6 +15,12 @@ It detects nearby devices groups and show it to user, User can then choose the g
 will form a Wifi connection to the host device(Teacher's device), after that user can mark his
 attendance by clicking on the absent button and entering his attendance when asked.
 
+## Table of Contents
+
+* [Todo List](#todo-list)
+* [App Images](#app-images)
+* [Contributors](#contributors)
+
 Todo List
 --
 - [x] UI make over
