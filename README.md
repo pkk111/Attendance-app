@@ -15,6 +15,12 @@ It detects nearby devices groups and show it to user, User can then choose the g
 will form a Wifi connection to the host device(Teacher's device), after that user can mark his
 attendance by clicking on the absent button and entering his attendance when asked.
 
+## Table of Contents
+
+* [Todo List](#todo-list)
+* [App Images](#app-images)
+* [Contributors](#contributors)
+
 Todo List
 --
 [x] UI make over
@@ -29,14 +35,13 @@ Todo List
 [] Let Students store Attendance as per class name and see it in future
 [] Add backend for the app to store previous configurations of the user and a login to the app
 [] Feature to analise the previous attendance and give alerts for the variations in data of a
-student attendance
 
 ### App Images
 
-!(home)(project_images/home.jpg)
-!(student)(project_images/student.jpg)
-!(searching)(project_images/searching.jpg)
-!(teacher)(project_images/teacher.jpg)
+![home](project_images/home.jpg)
+![student](project_images/student.jpg)
+![searching](project_images/searching.jpg)
+![teacher](project_images/teacher.jpg)
 
  ---
 
