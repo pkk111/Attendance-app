@@ -10,11 +10,11 @@ class SharedPref {
     companion object {
 
         fun setString(context: Context, key: String, value: String) {
-            getEditor(context).putString(key, value)
+            getEditor(context).putString(key, value).commit()
         }
 
         fun setInt(context: Context, key: String, value: Int) {
-            getEditor(context).putInt(key, value)
+            getEditor(context).putInt(key, value).commit()
         }
 
         fun getString(context: Context, key: String?, def: String = ""): String? {

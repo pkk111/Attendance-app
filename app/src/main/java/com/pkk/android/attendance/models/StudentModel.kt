@@ -1,6 +1,6 @@
 package com.pkk.android.attendance.models
 
-class Student {
+class StudentModel {
 
     var rollNo: Int
     var isPresent: Boolean

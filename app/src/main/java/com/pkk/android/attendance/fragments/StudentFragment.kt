@@ -1,30 +1,32 @@
 package com.pkk.android.attendance.fragments
 
 import android.Manifest
-import android.app.AlertDialog
 import android.os.Bundle
-import android.text.InputType
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.EditText
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.core.view.setPadding
+import androidx.appcompat.app.AppCompatActivity
+import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
+import androidx.navigation.fragment.NavHostFragment
 import com.google.gson.Gson
 import com.pkk.android.attendance.R
+import com.pkk.android.attendance.databinding.FragmentStudentBinding
+import com.pkk.android.attendance.dialogFragment.DialogEnterRollNumberFragment
 import com.pkk.android.attendance.misc.CentralVariables
 import com.pkk.android.attendance.misc.Utils
 import com.pkk.android.attendance.models.MessageCodes
 import com.pkk.android.attendance.models.MessageModel
-import kotlinx.android.synthetic.main.fragment_student.*
 import java.net.Inet4Address
 import java.net.NetworkInterface
 import java.net.SocketException
 
 class StudentFragment : Fragment(), View.OnClickListener {
 
+    private var _binding: FragmentStudentBinding? = null
+    private val binding get() = _binding!!
     private var rollNo: String? = null
     private var gson: Gson? = null
     private var message: String? = null
@@ -42,10 +44,16 @@ class StudentFragment : Fragment(), View.OnClickListener {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         requireActivity().supportFragmentManager.setFragmentResultListener(
-            CentralVariables.KEY_FRAGMENT_MESSAGE_KEY,
+            CentralVariables.KEY_PULSE_FRAGMENT_MESSAGE_KEY,
             this
         ) { _, bundle ->
-            updateUI(bundle.getString("message"))
+            updateUI(bundle.getString(CentralVariables.KEY_MESSAGE))
+        }
+        requireActivity().supportFragmentManager.setFragmentResultListener(
+            CentralVariables.KEY_ENTER_ROLL_NUMBER_DIALOG_FRAGMENT_MESSAGE,
+            this
+        ) { _, bundle ->
+            startDiscoveringTeacherDevice(bundle.getInt(CentralVariables.Key_ROLL_NO))
         }
     }
 
@@ -53,55 +61,31 @@ class StudentFragment : Fragment(), View.OnClickListener {
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
-        return inflater.inflate(R.layout.fragment_student, container, false)
-    }
-
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
+    ): View {
+        _binding = FragmentStudentBinding.inflate(inflater, container, false)
         initialise()
+        return binding.root
     }
 
     private fun initialise() {
-        attendanceStatus!!.setOnClickListener(this)
-        buttonSend.setOnClickListener(this)
+        binding.attendanceStatus.setOnClickListener(this)
+        binding.buttonSend.setOnClickListener(this)
         gson = Gson()
     }
 
     override fun onClick(v: View) {
         when (v.id) {
             R.id.buttonSend -> {
-                val m = MessageModel(MessageCodes.CUSTOM, sendMessageEditText!!.text.toString())
+                val m =
+                    MessageModel(MessageCodes.CUSTOM, binding.sendMessageEditText.text.toString())
                 message = gson!!.toJson(m)
                 requestPermission()
             }
             R.id.attendanceStatus -> {
-                val builder = AlertDialog.Builder(requireContext())
-                builder.setTitle("Enter Your Roll No")
-
-                // Set up the input
-                val input = EditText(requireContext())
-                input.inputType = InputType.TYPE_CLASS_NUMBER
-                input.setPadding(20)
-                builder.setView(input)
-
-                // Set up the buttons
-                builder.setPositiveButton("OK") { _, _ ->
-                    rollNo = input.text.toString()
-                    if (rollNo!!.isNotEmpty()) {
-                        val model = MessageModel()
-                        model.rollNo = rollNo!!.toInt()
-                        model.isPresent = true
-                        model.ip = localIpAddress
-                        message = gson!!.toJson(model)
-                        requestPermission()
-                    } else Utils.showShortToast(
-                        requireContext(),
-                        "Enter Roll No to mark your attendance"
-                    )
-                }
-                builder.setNegativeButton("Cancel") { dialog, _ -> dialog.cancel() }
-                builder.show()
+                DialogEnterRollNumberFragment().show(
+                    childFragmentManager,
+                    DialogEnterRollNumberFragment.TAG
+                )
             }
         }
     }
@@ -112,15 +96,11 @@ class StudentFragment : Fragment(), View.OnClickListener {
 
     private fun openFragment() {
         try {
-            val ft = requireActivity().supportFragmentManager.beginTransaction()
-            ft.setCustomAnimations(
-                R.anim.slide_in_from_top_left,
-                R.anim.slide_out_to_top_left,
-                R.anim.slide_in_from_top_left,
-                R.anim.slide_out_to_top_left
+            NavHostFragment.findNavController(this).navigate(
+                R.id.action_studentFragment_to_pulseLayoutFragment, bundleOf(
+                    CentralVariables.KEY_MESSAGE to message
+                )
             )
-            ft.replace(R.id.empty_layout, PulseLayoutFragment.newInstance(message))
-                .addToBackStack(null).commit()
         } catch (e: Exception) {
             Log.e("error", "exception is $e")
         }
@@ -130,15 +110,15 @@ class StudentFragment : Fragment(), View.OnClickListener {
         val model = gson!!.fromJson(message, MessageModel::class.java)
         when (model.messageCodes) {
             MessageCodes.NORMAL -> {
-                attendanceStatus!!.text = getString(R.string.present_marked)
-                attendanceStatus!!.isClickable = false
-                attendanceStatus!!.setBackgroundResource(R.drawable.start_button_background)
+                binding.attendanceStatus.text = getString(R.string.present_marked)
+                binding.attendanceStatus.isClickable = false
+                binding.attendanceStatus.setBackgroundResource(R.drawable.start_button_background)
             }
             MessageCodes.CUSTOM -> {
-                val s = replyFromServerTextView!!.text.toString()
+                val s = binding.replyFromServerTextView.text.toString()
                 if (s == "null")
                     return
-                replyFromServerTextView!!.append(
+                binding.replyFromServerTextView.append(
                     String.format(
                         "$s\n From Server : %s",
                         model.message
@@ -149,6 +129,25 @@ class StudentFragment : Fragment(), View.OnClickListener {
                 requireContext(), model.messageCodes.message
             )
         }
+    }
+
+    private fun startDiscoveringTeacherDevice(rollNo: Int) {
+        val model = MessageModel()
+        model.rollNo = rollNo
+        model.isPresent = true
+        model.ip = localIpAddress
+        message = gson!!.toJson(model)
+        requestPermission()
+    }
+
+    override fun onResume() {
+        super.onResume()
+        (activity as AppCompatActivity).supportActionBar?.hide()
+    }
+
+    override fun onStop() {
+        super.onStop()
+        (activity as AppCompatActivity).supportActionBar?.show()
     }
 
     companion object {

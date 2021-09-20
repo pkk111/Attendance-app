@@ -1,4 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <dimen name="forty_eight">48dp</dimen>
+    <!-- DrawerMenu dimensions -->
+    <dimen name="drawer_menu_icon">32dp</dimen>
+
+    <!-- Meeting card dimensions -->
+    <dimen name="meeting_card_heading">24sp</dimen>
+    <dimen name="meeting_card_details">14sp</dimen>
+    <dimen name="text_margin">16dp</dimen>
+
+    <!-- Session card dimensions -->
+    <dimen name="session_card_date">16sp</dimen>
+    <dimen name="session_card_time">32sp</dimen>
+    <dimen name="session_card_details">12sp</dimen>
 </resources>

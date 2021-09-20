@@ -1,20 +1,24 @@
 package com.pkk.android.attendance.connectionSetup
 
-import android.app.Activity
+import android.app.AlertDialog
+import android.content.Context
 import android.util.Log
 import com.google.android.gms.nearby.Nearby
 import com.google.android.gms.nearby.connection.DiscoveryOptions
+import com.google.android.gms.nearby.connection.Strategy
 import com.pkk.android.attendance.connectionSetup.PayloadHandler.ReceiveBytesPayloadListener
 import com.pkk.android.attendance.interfaces.ConnectionCallbackListener
 import com.pkk.android.attendance.interfaces.ConnectionEstablishedListener
 import com.pkk.android.attendance.interfaces.ConnectionStatusListeners
 import com.pkk.android.attendance.interfaces.PayloadCallbackListener
 import com.pkk.android.attendance.misc.CentralVariables
+import com.pkk.android.attendance.misc.SharedPref
 import com.pkk.android.attendance.misc.Utils.Companion.showShortToast
 import com.pkk.android.attendance.models.DeviceModel
 
 class Discoverer(
-    private val activity: Activity,
+    private val context: Context,
+    private val strategy: Strategy,
     private val connectionEstablishedListener: ConnectionEstablishedListener,
     private val connectionCallbackListener: ConnectionCallbackListener
 ) : ConnectionStatusListeners {
@@ -24,10 +28,10 @@ class Discoverer(
 
     fun startDiscovering(payloadCallbackListener: PayloadCallbackListener) {
         connectionCallback =
-            ConnectionCallback(activity, ReceiveBytesPayloadListener(payloadCallbackListener), this)
+            ConnectionCallback(context, ReceiveBytesPayloadListener(payloadCallbackListener), this)
         val discoveryOptions =
-            DiscoveryOptions.Builder().setStrategy(CentralVariables.STRATEGY).build()
-        Nearby.getConnectionsClient(activity)
+            DiscoveryOptions.Builder().setStrategy(strategy).build()
+        Nearby.getConnectionsClient(context)
             .startDiscovery(
                 CentralVariables.SERVICE_ID,
                 connectionCallback!!.getDiscoveryCallBack(connectionCallbackListener),
@@ -35,22 +39,37 @@ class Discoverer(
             )
             .addOnSuccessListener { Log.d("discovery", "successfully started discovering") }
             .addOnFailureListener { e: Exception ->
-                showShortToast(activity, "Failure in discovering devices")
+                showShortToast(context, "Failure in discovering devices")
                 Log.e("discovery", "Failure in discovering, exception: $e")
             }
     }
 
     fun stopDiscovering() {
-        Nearby.getConnectionsClient(activity).stopAdvertising()
-        Nearby.getConnectionsClient(activity).stopAllEndpoints()
+        Nearby.getConnectionsClient(context).stopAdvertising()
+        Nearby.getConnectionsClient(context).stopAllEndpoints()
     }
 
     fun requestConnection(device: DeviceModel) {
-        connectionCallback!!.requestConnection(device)
+        connectionCallback!!.requestConnection(
+            device,
+            SharedPref.getString(context, CentralVariables.KEY_USERNAME, "")!!
+        )
     }
 
     fun sendMessage(message: String) {
-        PayloadHandler(activity).sendString(connectedDevice!!.endpointID, message)
+        PayloadHandler(context).sendString(connectedDevice!!.endpointID, message)
+    }
+
+    override fun onConnectionRequested(device: DeviceModel, authDigits: String) {
+        connectionCallback?.acceptConnectionRequest(device)
+        if (strategy == Strategy.P2P_POINT_TO_POINT) {
+            val builder = AlertDialog.Builder(context)
+            builder.setTitle("Connection Code: $authDigits")
+            builder.setPositiveButton("Ok") { _, _ ->
+            }
+            builder.show()
+        }
+
     }
 
     override fun onConnectionEstablished(device: DeviceModel) {
@@ -60,7 +79,7 @@ class Discoverer(
 
     override fun onConnectionErrorOccurred(part: String, e: Exception) {
         Log.e("Error", "$part: $e")
-        showShortToast(activity, "Error occurred, Please Try Again")
+        showShortToast(context, "Error occurred, Please Try Again")
     }
 
     override fun onConnectionDisconnected(endpoint: String) {

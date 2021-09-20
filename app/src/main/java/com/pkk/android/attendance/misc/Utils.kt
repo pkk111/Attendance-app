@@ -74,5 +74,21 @@ class Utils {
             )
         }
 
+        fun getBackgrounds(): ArrayList<Int> {
+            return ArrayList(
+                listOf(
+                    R.drawable.background_1,
+                )
+            )
+        }
+
+        fun getNumberSuffix(n: Int): String {
+            return when (n % 10) {
+                1 -> "${n}st"
+                2 -> "${n}nd"
+                3 -> "${n}rd"
+                else -> "${n}th"
+            }
+        }
     }
 }

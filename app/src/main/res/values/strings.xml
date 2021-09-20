@@ -12,6 +12,7 @@
         <item>Teacher</item>
     </string-array>
     <string name="cancel">Cancel</string>
+    <string name="present">Present</string>
     <string name="absent">Absent</string>
     <string name="send">Send</string>
     <string name="enter_message">Enter message</string>
@@ -30,11 +31,27 @@
     <string name="add_new_roll_number">Add New Roll Number</string>
     <string name="end_label">End :</string>
     <string name="start_label">Start :</string>
-    <string name="ending_roll_no">Ending Roll Number</string>
-    <string name="starting_roll_no">Starting Roll Number</string>
+    <string name="ending_roll_no">ending roll no</string>
+    <string name="starting_roll_no">starting roll no</string>
     <string name="roll_no_label">Roll No :</string>
-    <string name="enter_roll_number">Enter Roll Number</string>
+    <string name="roll_number">roll number</string>
+    <string name="home">Home</string>
+    <string name="profile">Profile</string>
     <string name="feedback">Feedback</string>
-    <!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="coming_soon">Coming Soon</string>
+    <string name="Meetings">Meetings</string>
+    <string name="no_meets_found">No Meetings Found</string>
+    <string name="partition">|</string>
+    <string name="share">Share</string>
+    <string name="delete">Delete</string>
+    <string name="menu_items">menu items</string>
+    <string name="save_to">Save To:</string>
+    <string name="meeting_name">meeting name</string>
+    <string name="dont_save">Don\'t Save</string>
+    <string name="save">Save</string>
+    <string name="enter_roll_no_range">Enter Roll Number Range</string>
+    <string name="ok">OK</string>
+    <string name="enter_roll_number">Enter Roll Number</string>
+    <string name="icon_to_open_drawer">icon to open drawer</string>
+
 </resources>

@@ -7,11 +7,13 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.LinearLayout
+import androidx.appcompat.app.AppCompatActivity
 import androidx.cardview.widget.CardView
 import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 import com.pkk.android.attendance.R
 import com.pkk.android.attendance.connectionSetup.Discoverer
+import com.pkk.android.attendance.databinding.FragmentPulseLayoutBinding
 import com.pkk.android.attendance.interfaces.ConnectionCallbackListener
 import com.pkk.android.attendance.interfaces.ConnectionEstablishedListener
 import com.pkk.android.attendance.interfaces.DeviceSelectedListener
@@ -21,11 +23,12 @@ import com.pkk.android.attendance.misc.SharedPref
 import com.pkk.android.attendance.misc.Utils
 import com.pkk.android.attendance.misc.Utils.Companion.toDp
 import com.pkk.android.attendance.models.DeviceModel
-import kotlinx.android.synthetic.main.fragment_pulse_layout.*
 
 class PulseLayoutFragment : Fragment(), PayloadCallbackListener, ConnectionEstablishedListener,
     DeviceSelectedListener, ConnectionCallbackListener {
 
+    private var _binding: FragmentPulseLayoutBinding? = null
+    private val binding get() = _binding!!
     private var discoverer: Discoverer? = null
     private var message: String? = null
     private var card: CardView? = null
@@ -36,28 +39,25 @@ class PulseLayoutFragment : Fragment(), PayloadCallbackListener, ConnectionEstab
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         arguments?.let {
-            message = it.getString("message", "")
+            message = it.getString(CentralVariables.KEY_MESSAGE, "")
         }
     }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
-        return inflater.inflate(R.layout.fragment_pulse_layout, container, false)
-    }
-
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
-
-        toolbar.setNavigationOnClickListener { closeCurrentFragment() }
+    ): View {
+        _binding = FragmentPulseLayoutBinding.inflate(inflater, container, false)
+        binding.toolbar.setNavigationOnClickListener { closeCurrentFragment() }
 
         setBackgroundCard()
         searchNearbyDevices()
-        setName(SharedPref.getString(requireContext(), CentralVariables.KEY_HOST_NAME))
-        setPic(SharedPref.getInt(requireContext(), CentralVariables.KEY_PROFILE_PIC))
+        setName(SharedPref.getString(requireContext(), CentralVariables.KEY_USERNAME))
+        val profilePic = SharedPref.getInt(requireContext(), CentralVariables.KEY_PROFILE_PIC)
+        if (profilePic != -1) setPic(profilePic)
         //Start Animation
         startPulse()
+        return binding.root
     }
 
     private fun setBackgroundCard() {
@@ -87,15 +87,15 @@ class PulseLayoutFragment : Fragment(), PayloadCallbackListener, ConnectionEstab
 
             card!!.radius = (radius * 1.5f).toInt().toDp(requireContext())
             card!!.setCardBackgroundColor(Color.BLUE)
-            pulse_layout_fragment.addView(card, 0)
-            pulse_layout_fragment.setBackgroundColor(
+            binding.pulseLayoutFragment.addView(card, 0)
+            binding.pulseLayoutFragment.setBackgroundColor(
                 Utils.getColorFromResource(
                     requireContext(),
                     R.color.transparent
                 )
             )
         } else {
-            pulse_layout_fragment.setBackgroundColor(
+            binding.pulseLayoutFragment.setBackgroundColor(
                 Utils.getColorFromResource(
                     requireContext(),
                     R.color.pulselayout_backgroundcolor
@@ -105,11 +105,11 @@ class PulseLayoutFragment : Fragment(), PayloadCallbackListener, ConnectionEstab
     }
 
     private fun searchNearbyDevices() {
-        pulsator!!.start()
-        pulsator!!.setColor(0)
-        pulsator!!.setAvatars(Utils.getAvatars())
-        pulsator!!.setListener(this)
-        discoverer = Discoverer(requireActivity(), this, this)
+        binding.pulsator.start()
+        binding.pulsator.setColor(0)
+        binding.pulsator.setAvatars(Utils.getAvatars())
+        binding.pulsator.setListener(this)
+        discoverer = Discoverer(requireActivity(), CentralVariables.STAR_STRATEGY, this, this)
         discoverer!!.startDiscovering(this)
     }
 
@@ -118,11 +118,11 @@ class PulseLayoutFragment : Fragment(), PayloadCallbackListener, ConnectionEstab
     }
 
     override fun onDeviceDetected(device: DeviceModel) {
-        pulsator!!.addDetectedDevice(device)
+        binding.pulsator.addDetectedDevice(device)
     }
 
     override fun onDeviceLost(endpoint: String) {
-        pulsator!!.removeDetectedDevice(endpoint)
+        binding.pulsator.removeDetectedDevice(endpoint)
     }
 
     override fun onDeviceSelected(device: DeviceModel) {
@@ -135,8 +135,8 @@ class PulseLayoutFragment : Fragment(), PayloadCallbackListener, ConnectionEstab
 
     override fun onPayloadReceived(message: String?, endpointId: String?) {
         requireActivity().supportFragmentManager.setFragmentResult(
-            CentralVariables.KEY_FRAGMENT_MESSAGE_KEY,
-            bundleOf("message" to message)
+            CentralVariables.KEY_PULSE_FRAGMENT_MESSAGE_KEY,
+            bundleOf(CentralVariables.KEY_MESSAGE to message)
         )
         closeCurrentFragment()
     }
@@ -149,22 +149,21 @@ class PulseLayoutFragment : Fragment(), PayloadCallbackListener, ConnectionEstab
     }
 
     private fun startPulse() {
-        pulsator!!.post {
-            pulsator!!.setListener(this)
-            pulsator!!.start()
+        binding.pulsator.post {
+            binding.pulsator.setListener(this)
+            binding.pulsator.start()
         }
     }
 
     private fun setName(displayName: String?) {
-        requireActivity().runOnUiThread { name.text = displayName }
+        requireActivity().runOnUiThread { binding.name.text = displayName }
     }
 
 
     private fun setPic(displayPic: Int) {
         if (displayPic >= 0)
             requireActivity().runOnUiThread {
-                pic.background =
-                    Utils.getDrawableFromResource(requireContext(), Utils.getAvatars()[displayPic])
+                binding.pic.setImageResource(Utils.getAvatars()[displayPic])
             }
     }
 
@@ -178,5 +177,14 @@ class PulseLayoutFragment : Fragment(), PayloadCallbackListener, ConnectionEstab
             }
     }
 
+    override fun onResume() {
+        super.onResume()
+        (activity as AppCompatActivity).supportActionBar?.hide()
+    }
+
+    override fun onStop() {
+        super.onStop()
+        (activity as AppCompatActivity).supportActionBar?.show()
+    }
 
 }

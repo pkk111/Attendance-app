@@ -4,7 +4,7 @@ import android.content.Context
 import androidx.core.content.ContextCompat
 import com.pkk.android.attendance.R
 import com.pkk.android.attendance.misc.Utils.Companion.showShortToast
-import com.pkk.android.attendance.models.Student
+import com.pkk.android.attendance.models.StudentModel
 import java.util.*
 
 class MessageExtractor(start: Int, end: Int) {
@@ -29,7 +29,7 @@ class MessageExtractor(start: Int, end: Int) {
         for (x in Companion.students.indices) {
             val student = Companion.students[x]
             if (student.rollNo == rollNo) {
-                Companion.students[x] = Student(rollNo, present, ip)
+                Companion.students[x] = StudentModel(rollNo, present, ip)
                 return x
             }
         }
@@ -43,7 +43,7 @@ class MessageExtractor(start: Int, end: Int) {
                 return
             }
         }
-        Companion.students.add(Student(rollNo))
+        Companion.students.add(StudentModel(rollNo))
     }
 
     fun getStatus(roll_no: Int): Boolean {
@@ -51,12 +51,12 @@ class MessageExtractor(start: Int, end: Int) {
         return false
     }
 
-    val students: List<Student>
+    val students: List<StudentModel>
         get() = Companion.students
 
     companion object {
 
-        private var students: MutableList<Student> = LinkedList()
+        private var students: MutableList<StudentModel> = ArrayList()
 
         fun getColour(context: Context, bool: Boolean): Int {
             return if (bool) ContextCompat.getColor(
@@ -71,14 +71,14 @@ class MessageExtractor(start: Int, end: Int) {
 
         fun setStatus(index: Int, status: Boolean) {
             val oldStudent = students[index]
-            students[index] = Student(oldStudent.rollNo, status, null)
+            students[index] = StudentModel(oldStudent.rollNo, status, null)
         }
     }
 
     init {
         Companion.students.clear()
         for (x in start..end) {
-            Companion.students.add(Student(x))
+            Companion.students.add(StudentModel(x))
         }
     }
 }

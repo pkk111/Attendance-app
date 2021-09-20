@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/mobile_navigation"
+    app:startDestination="@+id/nav_home">
+
+    <fragment
+        android:id="@+id/nav_home"
+        android:name="com.pkk.android.attendance.fragments.HomeFragment"
+        android:label="home"
+        tools:layout="@layout/fragment_home">
+        <action
+            android:id="@+id/action_homeFragment_to_studentFragment"
+            app:destination="@+id/studentFragment"
+            app:enterAnim="@anim/slide_in_from_right"
+            app:popExitAnim="@anim/slide_out_to_right" />
+        <action
+            android:id="@+id/action_homeFragment_to_teacherFragment"
+            app:destination="@+id/teacherFragment"
+            app:enterAnim="@anim/slide_in_from_right"
+            app:popExitAnim="@anim/slide_out_to_right" />
+    </fragment>
+    <fragment
+        android:id="@+id/nav_profile"
+        android:name="com.pkk.android.attendance.fragments.ProfileFragment"
+        android:label="Profile"
+        tools:layout="@layout/fragment_profile" />
+    <fragment
+        android:id="@+id/studentFragment"
+        android:name="com.pkk.android.attendance.fragments.StudentFragment"
+        android:label="Student"
+        tools:layout="@layout/fragment_student">
+        <action
+            android:id="@+id/action_studentFragment_to_pulseLayoutFragment"
+            app:destination="@id/pulseLayoutFragment"
+            app:enterAnim="@anim/slide_in_from_top_left"
+            app:popExitAnim="@anim/slide_out_to_top_left" />
+    </fragment>
+    <fragment
+        android:id="@+id/teacherFragment"
+        android:name="com.pkk.android.attendance.fragments.TeacherFragment"
+        android:label="Teacher"
+        tools:layout="@layout/fragment_teacher" />
+    <fragment
+        android:id="@+id/nav_feedback"
+        android:name="com.pkk.android.attendance.fragments.FeedbackFragment"
+        android:label="Feedback"
+        tools:layout="@layout/fragment_feedback" />
+    <fragment
+        android:id="@+id/nav_meetings"
+        android:name="com.pkk.android.attendance.fragments.MeetingsFragment"
+        android:label="Meetings"
+        tools:layout="@layout/fragment_meetings_list_item">
+        <action
+            android:id="@+id/action_nav_meetings_to_sessionsFragment"
+            app:destination="@id/sessionsFragment"
+            app:enterAnim="@anim/slide_in_from_right"
+            app:popExitAnim="@anim/slide_out_to_right" />
+    </fragment>
+    <fragment
+        android:id="@+id/pulseLayoutFragment"
+        android:name="com.pkk.android.attendance.fragments.PulseLayoutFragment"
+        tools:layout="@layout/fragment_pulse_layout" />
+    <fragment
+        android:id="@+id/sessionsFragment"
+        android:name="com.pkk.android.attendance.fragments.SessionsFragment"
+        android:label="Sessions"
+        tools:layout="@layout/fragment_session">
+        <action
+            android:id="@+id/action_sessionsFragment_to_showAttendanceFragment"
+            app:destination="@id/showAttendanceFragment"
+            app:enterAnim="@anim/slide_in_from_right"
+            app:popExitAnim="@anim/slide_out_to_right" />
+    </fragment>
+    <fragment
+        android:id="@+id/showAttendanceFragment"
+        android:name="com.pkk.android.attendance.fragments.ShowAttendanceFragment"
+        android:label="Attendance"
+        tools:layout="@layout/fragment_show_attendance" />
+</navigation>

@@ -7,8 +7,6 @@ import com.google.android.gms.nearby.Nearby
 import com.google.android.gms.nearby.connection.*
 import com.pkk.android.attendance.interfaces.ConnectionCallbackListener
 import com.pkk.android.attendance.interfaces.ConnectionStatusListeners
-import com.pkk.android.attendance.misc.CentralVariables
-import com.pkk.android.attendance.misc.SharedPref.Companion.getString
 import com.pkk.android.attendance.misc.Utils.Companion.showShortToast
 import com.pkk.android.attendance.models.DeviceModel
 import java.util.*
@@ -18,9 +16,6 @@ class ConnectionCallback(
     var payloadCallback: PayloadCallback,
     var listeners: ConnectionStatusListeners
 ) {
-
-    private val localUserName: String
-        get() = getString(context, CentralVariables.KEY_DISCOVERER_NAME, "")!!
 
     //Callback for discovery of devices
     fun getDiscoveryCallBack(deviceCallbackListener: ConnectionCallbackListener): EndpointDiscoveryCallback {
@@ -45,7 +40,7 @@ class ConnectionCallback(
         }
     }
 
-    fun requestConnection(device: DeviceModel) {
+    fun requestConnection(device: DeviceModel, localUserName: String) {
         Nearby.getConnectionsClient(context)
             .requestConnection(localUserName, device.endpointID, connectionLifecycleCallback)
             .addOnSuccessListener { Log.d("CONNECTION", "Connection requested successfully") }
@@ -65,8 +60,12 @@ class ConnectionCallback(
     var connectionLifecycleCallback: ConnectionLifecycleCallback =
         object : ConnectionLifecycleCallback() {
             override fun onConnectionInitiated(endpointId: String, connectionInfo: ConnectionInfo) {
-                names!![endpointId] = connectionInfo.endpointName
-                Nearby.getConnectionsClient(context).acceptConnection(endpointId, payloadCallback)
+                listeners.onConnectionRequested(
+                    DeviceModel(
+                        endpointId,
+                        connectionInfo.endpointName
+                    ), connectionInfo.authenticationDigits
+                )
             }
 
             override fun onConnectionResult(endpointId: String, result: ConnectionResolution) {
@@ -99,6 +98,11 @@ class ConnectionCallback(
                 }
             }
         }
+
+    fun acceptConnectionRequest(device: DeviceModel) {
+        names!![device.endpointID] = device.deviceName!!
+        Nearby.getConnectionsClient(context).acceptConnection(device.endpointID, payloadCallback)
+    }
 
     companion object {
         var names: HashMap<String, String>? = HashMap()

@@ -11,19 +11,19 @@ import com.google.android.material.switchmaterial.SwitchMaterial
 import com.pkk.android.attendance.R
 import com.pkk.android.attendance.adapter.TeacherAdapter.MyViewHolder
 import com.pkk.android.attendance.misc.MessageExtractor
-import com.pkk.android.attendance.models.Student
+import com.pkk.android.attendance.models.StudentModel
 
 class TeacherAdapter(private var context: Context) : RecyclerView.Adapter<MyViewHolder>() {
 
-    private var students: List<Student>? = null
+    private var students: List<StudentModel>? = null
     private var layoutInflater = LayoutInflater.from(context)
 
-    fun setAttendance(students: List<Student>) {
+    fun setAttendance(students: List<StudentModel>) {
         this.students = students
     }
 
     override fun onCreateViewHolder(viewGroup: ViewGroup, i: Int): MyViewHolder {
-        val view = layoutInflater.inflate(R.layout.attendencestatus, viewGroup, false)
+        val view = layoutInflater.inflate(R.layout.attendance_status, viewGroup, false)
         return MyViewHolder(view)
     }
 

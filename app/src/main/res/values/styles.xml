@@ -6,8 +6,39 @@
         <item name="windowNoTitle">true</item>
     </style>
 
-    <style name="AppTheme.ScreenLayout" parent="AppTheme">
+    <style name="AppBackground" parent="">
         <item name="android:background">@drawable/background_lightblue</item>
     </style>
+
+    <style name="Theme.NavBarApp.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar" />
+
+    <style name="CustomActionBar" parent="AppTheme">
+        <item name="android:windowNoTitle">true</item>
+
+        <item name="android:windowActionBarOverlay">true</item>
+        <item name="android:windowBackground">@android:color/transparent</item>
+    </style>
+
+    <style name="Theme.NavBarApp.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />
+
+    <style name="AppTheme.AlertDialogButton" parent="">
+        <item name="android:textSize">18sp</item>
+        <item name="android:paddingLeft">12dp</item>
+        <item name="android:paddingRight">12dp</item>
+        <item name="android:paddingTop">8dp</item>
+        <item name="android:background">?android:attr/selectableItemBackgroundBorderless</item>
+        <item name="android:paddingBottom">8dp</item>
+    </style>
+
+    <style name="AppTheme.AlertDialogButton.Positive" parent="AppTheme.AlertDialogButton">
+        <item name="android:background">?android:attr/selectableItemBackgroundBorderless</item>
+        <item name="android:textColor">@color/black</item>
+    </style>
+
+    <style name="AppTheme.AlertDialogButton.Negative" parent="AppTheme.AlertDialogButton">
+        <item name="android:background">?android:attr/selectableItemBackgroundBorderless</item>
+        <item name="android:textColor">@color/black</item>
+    </style>
+
 
 </resources>
