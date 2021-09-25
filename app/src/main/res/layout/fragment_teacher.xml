@@ -1,104 +1,127 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    style="@style/AppBackground"
-    tools:context=".fragments.TeacherFragment">
+    xmlns:tools="http://schemas.android.com/tools">
 
-    <RelativeLayout
+    <data>
+
+        <import type="android.view.View" />
+
+        <variable
+            name="teacherViewModel"
+            type="com.pkk.android.attendance.viewModels.TeacherViewModel" />
+    </data>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        style="@style/AppBackground"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_marginTop="24dp"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintTop_toTopOf="parent">
+        android:fitsSystemWindows="true"
+        tools:context=".fragments.TeacherFragment">
 
-        <Button
-            android:id="@+id/buttonReceiving"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentTop="true"
-            android:layout_centerHorizontal="true"
-            android:layout_marginTop="10dp"
-            android:background="@drawable/start_button_background"
-            android:paddingHorizontal="24dp"
-            android:paddingVertical="36dp"
-            android:text="@string/start"
-            android:textSize="24sp" />
-
-        <ScrollView
-            android:id="@+id/scrollview"
+        <androidx.appcompat.widget.Toolbar
+            android:id="@+id/toolbar"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_below="@id/buttonReceiving"
-            android:layout_alignParentStart="true"
-            android:layout_alignParentLeft="true"
-            android:layout_marginStart="15dp"
-            android:layout_marginLeft="15dp"
-            android:layout_marginTop="15dp"
-            android:layout_marginEnd="15dp"
-            android:layout_marginRight="15dp"
-            android:layout_marginBottom="15dp">
+            android:layout_height="?attr/actionBarSize"
+            android:background="@color/transparent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:navigationIcon="@drawable/ic_arrow" />
 
-            <TextView
-                android:id="@+id/textFromClient"
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_marginTop="24dp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/toolbar"
+            app:layout_constraintBottom_toBottomOf="parent">
+
+            <Button
+                android:id="@+id/buttonReceiving"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentTop="true"
+                android:layout_centerHorizontal="true"
+                android:layout_marginTop="10dp"
+                android:background="@{teacherViewModel.isRunning() ? @drawable/stop_button_background : @drawable/start_button_background}"
+                android:paddingHorizontal="24dp"
+                android:paddingVertical="36dp"
+                android:text="@{teacherViewModel.isRunning() ? @string/stop : @string/start}"
+                android:textSize="24sp" />
+
+            <ScrollView
+                android:id="@+id/scrollview"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="vertical" />
-        </ScrollView>
+                android:layout_below="@id/buttonReceiving"
+                android:layout_alignParentStart="true"
+                android:layout_alignParentLeft="true"
+                android:layout_marginStart="15dp"
+                android:layout_marginLeft="15dp"
+                android:layout_marginTop="15dp"
+                android:layout_marginEnd="15dp"
+                android:layout_marginRight="15dp"
+                android:layout_marginBottom="15dp">
 
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/recyclerView"
-            android:layout_width="match_parent"
+                <TextView
+                    android:id="@+id/textFromClient"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical" />
+            </ScrollView>
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/recyclerView"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_below="@id/scrollview"
+                android:layout_marginTop="10dp">
+
+            </androidx.recyclerview.widget.RecyclerView>
+
+        </RelativeLayout>
+
+        <androidx.constraintlayout.widget.Guideline
+            android:id="@+id/teacher_fab_left_guidline"
+            android:layout_width="wrap_content"
             android:layout_height="match_parent"
-            android:layout_below="@id/scrollview"
-            android:layout_marginTop="10dp">
-
-        </androidx.recyclerview.widget.RecyclerView>
-
-    </RelativeLayout>
-
-    <androidx.constraintlayout.widget.Guideline
-        android:id="@+id/teacher_fab_left_guidline"
-        android:layout_width="wrap_content"
-        android:layout_height="match_parent"
-        android:orientation="vertical"
-        app:layout_constraintGuide_percent="0.8" />
+            android:orientation="vertical"
+            app:layout_constraintGuide_percent="0.8" />
 
 
-    <com.google.android.material.floatingactionbutton.FloatingActionButton
-        android:id="@+id/refresh"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginVertical="30dp"
-        android:contentDescription="@string/refresh_roll_number_list"
-        android:padding="10dp"
-        android:scaleType="center"
-        android:src="@drawable/ic_refresh_arrow"
-        android:tint="@color/white"
-        android:visibility="invisible"
-        app:backgroundTint="@color/fab_button_color"
-        app:layout_constraintBottom_toTopOf="@+id/addRollNumber"
-        app:layout_constraintLeft_toLeftOf="@+id/addRollNumber"
-        app:layout_constraintRight_toRightOf="@+id/addRollNumber" />
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:id="@+id/refresh"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginVertical="32dp"
+            android:contentDescription="@string/refresh_roll_number_list"
+            android:padding="10dp"
+            android:scaleType="center"
+            android:src="@drawable/ic_refresh_arrow"
+            android:tint="@color/white"
+            android:visibility="@{teacherViewModel.isRunning() ? View.VISIBLE : View.INVISIBLE}"
+            app:backgroundTint="@color/fab_button_color"
+            app:layout_constraintBottom_toTopOf="@+id/addRollNumber"
+            app:layout_constraintLeft_toLeftOf="@+id/addRollNumber"
+            app:layout_constraintRight_toRightOf="@+id/addRollNumber" />
 
 
-    <com.google.android.material.floatingactionbutton.FloatingActionButton
-        android:id="@+id/addRollNumber"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginHorizontal="10dp"
-        android:layout_marginVertical="30dp"
-        android:contentDescription="@string/add_new_roll_number"
-        android:scaleType="center"
-        android:src="@drawable/ic_add"
-        android:tint="#FFFFFF"
-        android:visibility="invisible"
-        app:backgroundTint="@color/fab_button_color"
-        app:borderWidth="0dp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintLeft_toLeftOf="@+id/teacher_fab_left_guidline"
-        app:layout_constraintRight_toRightOf="parent" />
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:id="@+id/addRollNumber"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="10dp"
+            android:layout_marginVertical="32dp"
+            android:contentDescription="@string/add_new_roll_number"
+            android:scaleType="center"
+            android:src="@drawable/ic_add"
+            android:tint="#FFFFFF"
+            android:visibility="@{teacherViewModel.isRunning() ? View.VISIBLE : View.INVISIBLE}"
+            app:backgroundTint="@color/fab_button_color"
+            app:borderWidth="0dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintLeft_toLeftOf="@+id/teacher_fab_left_guidline"
+            app:layout_constraintRight_toRightOf="parent" />
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</layout>

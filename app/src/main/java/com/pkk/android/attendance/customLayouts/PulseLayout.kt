@@ -10,6 +10,7 @@ import android.graphics.Canvas
 import android.graphics.Paint
 import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.Drawable
+import android.text.InputFilter
 import android.text.TextUtils
 import android.util.AttributeSet
 import android.util.Log
@@ -56,6 +57,8 @@ class PulseLayout @JvmOverloads constructor(
     private var repeatCount = INFINITE
     private var color = Utils.getColorFromResource(context, R.color.pulsecolor)
     private var interpolator = INTERP_LINEAR
+    private var textLength = 10
+
     private var detectedDevicesList: ArrayList<DetectedDevice>
     private var detectedDevices: HashMap<String, DetectedDevice>
     private var deviceViews: HashMap<DetectedDevice, View>
@@ -167,6 +170,9 @@ class PulseLayout @JvmOverloads constructor(
             name.gravity = CENTER_HORIZONTAL
             name.textSize = 12F
             name.maxLines = 1
+            name.setLines(1)
+            name.filters += InputFilter.LengthFilter(textLength)
+            name.ellipsize = TextUtils.TruncateAt.END
             linearLayout.addView(name)
             val detectedDevice = DetectedDevice(x, y)
             detectedDevices[device.endpointID] = detectedDevice
@@ -245,6 +251,7 @@ class PulseLayout @JvmOverloads constructor(
                 arr.getBoolean(R.styleable.PulseStyle_pulse_startFromScratch, startFromScratch)
             color = arr.getColor(R.styleable.PulseStyle_pulse_color, color)
             interpolator = arr.getInt(R.styleable.PulseStyle_pulse_interpolator, interpolator)
+            textLength = arr.getInt(R.styleable.PulseStyle_text_length, textLength)
         } catch (e: Exception) {
             Log.e("PulseLayout", "error in getting style attributes, Error: $e")
         } finally {

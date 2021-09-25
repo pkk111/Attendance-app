@@ -1,25 +1,13 @@
 <resources>
 
-    <!-- Base application theme. -->
-    <style name="AppTheme" parent="Theme.AppCompat.Light.DarkActionBar">
-        <item name="windowActionBar">false</item>
-        <item name="windowNoTitle">true</item>
-    </style>
-
     <style name="AppBackground" parent="">
         <item name="android:background">@drawable/background_lightblue</item>
     </style>
 
+    <style name="Theme.NavBarApp.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />
+
     <style name="Theme.NavBarApp.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar" />
 
-    <style name="CustomActionBar" parent="AppTheme">
-        <item name="android:windowNoTitle">true</item>
-
-        <item name="android:windowActionBarOverlay">true</item>
-        <item name="android:windowBackground">@android:color/transparent</item>
-    </style>
-
-    <style name="Theme.NavBarApp.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />
 
     <style name="AppTheme.AlertDialogButton" parent="">
         <item name="android:textSize">18sp</item>

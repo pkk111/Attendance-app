@@ -7,7 +7,9 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
+import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.GridLayoutManager
 import com.pkk.android.attendance.R
 import com.pkk.android.attendance.adapter.TeacherAdapter
@@ -17,21 +19,22 @@ import com.pkk.android.attendance.databinding.FragmentTeacherBinding
 import com.pkk.android.attendance.dialogFragment.DialogAttendanceRangeFragment
 import com.pkk.android.attendance.dialogFragment.DialogEnterRollNumberFragment
 import com.pkk.android.attendance.dialogFragment.DialogSaveAttendanceFragment
-import com.pkk.android.attendance.interfaces.PassDataListener
+import com.pkk.android.attendance.interfaces.ChangeAttendanceStatusListener
 import com.pkk.android.attendance.interfaces.PayloadCallbackListener
-import com.pkk.android.attendance.misc.AttendanceMarker
 import com.pkk.android.attendance.misc.CentralVariables
-import com.pkk.android.attendance.misc.MessageExtractor
+import com.pkk.android.attendance.misc.Utils
+import com.pkk.android.attendance.viewModels.TeacherViewModel
+import com.pkk.android.attendance.viewModels.ViewModelFactory
 
 class TeacherFragment : Fragment(), View.OnClickListener, PayloadCallbackListener,
-    PassDataListener {
+    ChangeAttendanceStatusListener {
 
     private var _binding: FragmentTeacherBinding? = null
     private val binding get() = _binding!!
     private var teacherAdapter: TeacherAdapter? = null
-    private var extractor: MessageExtractor? = null
-    private var isRunning = false
     private var advertiser: Advertiser? = null
+    private lateinit var viewModelFactory: ViewModelFactory
+    private lateinit var viewModel: TeacherViewModel
 
     private val requestPermissionLauncher =
         registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { permissions ->
@@ -77,27 +80,36 @@ class TeacherFragment : Fragment(), View.OnClickListener, PayloadCallbackListene
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        _binding = FragmentTeacherBinding.inflate(inflater, container, false)
+        _binding = DataBindingUtil.inflate(inflater, R.layout.fragment_teacher, container, false)
+        viewModelFactory = ViewModelFactory()
+        viewModel = ViewModelProvider(this, viewModelFactory).get(TeacherViewModel::class.java)
+
+        binding.teacherViewModel = viewModel
+        binding.lifecycleOwner = viewLifecycleOwner
+
         initialize()
         return binding.root
     }
 
     private fun initialize() {
-        teacherAdapter = TeacherAdapter(requireContext())
+        binding.toolbar.setNavigationOnClickListener { closeCurrentFragment() }
         binding.buttonReceiving.setOnClickListener(this)
         binding.refresh.setOnClickListener(this)
         binding.addRollNumber.setOnClickListener(this)
+//        viewModel.isRunning.observe(viewLifecycleOwner) {b -> if(b) startTakingAttendance(false, viewModel.start, viewModel.end)}
+        if (viewModel.isRunning.value!!)
+            startTakingAttendance(false, viewModel.start, viewModel.end)
     }
 
     private fun setRecyclerView() {
+        teacherAdapter = TeacherAdapter(requireContext(), viewModel.extractor.students, this)
         binding.recyclerView.adapter = teacherAdapter
         binding.recyclerView.layoutManager = GridLayoutManager(requireContext(), 2)
-        teacherAdapter!!.setAttendance(extractor!!.students)
     }
 
     override fun onClick(v: View) {
         when (v.id) {
-            R.id.buttonReceiving -> if (!isRunning) requestPermission() else
+            R.id.buttonReceiving -> if (!viewModel.isRunning.value!!) requestPermission() else
                 DialogSaveAttendanceFragment().show(
                     childFragmentManager,
                     DialogSaveAttendanceFragment.TAG
@@ -112,28 +124,20 @@ class TeacherFragment : Fragment(), View.OnClickListener, PayloadCallbackListene
 
     private fun startTakingAttendance(isCancelled: Boolean, start: Int, end: Int) {
         if (!isCancelled) {
-            extractor = MessageExtractor(start, end)
+            if (!viewModel.isRunning.value!!) {
+                viewModel.startRunning(start, end)
+                advertiser = Advertiser(requireContext(), CentralVariables.P2P_STRATEGY)
+                advertiser!!.startAdvertising(this)
+            }
             setRecyclerView()
-            advertiser = Advertiser(requireContext(), CentralVariables.P2P_STRATEGY)
-            advertiser!!.startAdvertising(this)
-            isRunning = true
-            binding.refresh.isEnabled = true
-            binding.buttonReceiving.setText(R.string.stop)
-            binding.buttonReceiving.setBackgroundResource(R.drawable.stop_button_background)
-            binding.addRollNumber.visibility = View.VISIBLE
-            binding.refresh.visibility = View.VISIBLE
         }
     }
 
     private fun stopTakingAttendance(isCancelled: Boolean) {
         if (!isCancelled) {
-            isRunning = false
+            viewModel.stopRunning()
             advertiser?.stopAdvertising()
-            binding.addRollNumber.visibility = View.INVISIBLE
-            binding.refresh.visibility = View.INVISIBLE
-            binding.buttonReceiving.setText(R.string.start)
-            binding.buttonReceiving.setBackgroundResource(R.drawable.start_button_background)
-            teacherAdapter?.notifyItemRangeRemoved(0, extractor?.students!!.size)
+            teacherAdapter?.notifyItemRangeRemoved(0, viewModel.getSize())
         }
     }
 
@@ -142,19 +146,20 @@ class TeacherFragment : Fragment(), View.OnClickListener, PayloadCallbackListene
     }
 
     private fun addRollNumber(roll: Int) {
-        extractor!!.addStud(requireContext(), roll)
-        teacherAdapter!!.notifyItemInserted(extractor!!.students.size - 1)
+        if (viewModel.addStudent(roll))
+            teacherAdapter!!.notifyItemInserted(viewModel.getSize() - 1)
+        else
+            Utils.showShortToast(requireContext(), "$roll already present for evaluation.")
     }
 
-    override fun onPayloadReceived(message: String?, endpointId: String?) {
-        val marker = AttendanceMarker(requireContext(), extractor!!, teacherAdapter!!, this)
-        val result = marker.markAttendance(message!!)
-        PayloadHandler(requireContext()).sendString(endpointId!!, result)
+    override fun onPayloadReceived(message: String, endpointId: String?) {
+        val result = viewModel.markAttendance(message)
+        if (result.first == -1)
+            binding.textFromClient.append(String.format("\nFrom Client: %s", result.second))
+        else
+            teacherAdapter?.notifyItemChanged(result.first)
+        PayloadHandler(requireContext()).sendString(endpointId!!, result.second)
         advertiser!!.disconnect(endpointId)
-    }
-
-    override fun passData(string: String?) {
-        binding.textFromClient.append(String.format("\nFrom Client: %s", string))
     }
 
     override fun onResume() {
@@ -166,4 +171,22 @@ class TeacherFragment : Fragment(), View.OnClickListener, PayloadCallbackListene
         super.onStop()
         (activity as AppCompatActivity).supportActionBar?.show()
     }
+
+    override fun changeStatusOf(index: Int) {
+        viewModel.changeStatus(index)
+        teacherAdapter!!.notifyItemChanged(index)
+    }
+
+    private fun closeCurrentFragment() {
+        requireActivity().supportFragmentManager.popBackStack()
+    }
+
+    override fun onDestroyView() {
+        viewModel.stopRunning()
+        if(advertiser!=null) {
+            advertiser?.stopAdvertising()
+        }
+        super.onDestroyView()
+    }
+
 }

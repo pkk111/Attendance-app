@@ -1,4 +1,4 @@
-# Attandence-app
+# Attendance-app
 
 **Version 1.4.0**
 

@@ -1,5 +1,6 @@
 package com.pkk.android.attendance.connectionSetup
 
+import android.app.Activity
 import android.app.AlertDialog
 import android.content.Context
 import android.util.Log
@@ -17,7 +18,7 @@ import com.pkk.android.attendance.misc.Utils.Companion.showShortToast
 import com.pkk.android.attendance.models.DeviceModel
 
 class Discoverer(
-    private val context: Context,
+    private val context: Activity,
     private val strategy: Strategy,
     private val connectionEstablishedListener: ConnectionEstablishedListener,
     private val connectionCallbackListener: ConnectionCallbackListener

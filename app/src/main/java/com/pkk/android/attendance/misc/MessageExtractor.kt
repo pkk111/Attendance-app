@@ -36,14 +36,14 @@ class MessageExtractor(start: Int, end: Int) {
         return -1
     }
 
-    fun addStud(context: Context, rollNo: Int) {
+    fun addStud(rollNo: Int): Boolean {
         for (student in Companion.students) {
             if (student.rollNo == rollNo) {
-                showShortToast(context, "$rollNo already present for evaluation.")
-                return
+                return false
             }
         }
         Companion.students.add(StudentModel(rollNo))
+        return true
     }
 
     fun getStatus(roll_no: Int): Boolean {
@@ -54,6 +54,10 @@ class MessageExtractor(start: Int, end: Int) {
     val students: List<StudentModel>
         get() = Companion.students
 
+    fun setStatus(index: Int, status: Boolean) {
+        val oldStudent = Companion.students[index]
+        Companion.students[index] = StudentModel(oldStudent.rollNo, status, null)
+    }
     companion object {
 
         private var students: MutableList<StudentModel> = ArrayList()
@@ -69,10 +73,6 @@ class MessageExtractor(start: Int, end: Int) {
             return if (bool) "Present" else "Absent"
         }
 
-        fun setStatus(index: Int, status: Boolean) {
-            val oldStudent = students[index]
-            students[index] = StudentModel(oldStudent.rollNo, status, null)
-        }
     }
 
     init {

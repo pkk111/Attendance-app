@@ -9,7 +9,9 @@ import android.view.ViewGroup
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.os.bundleOf
+import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.NavHostFragment
 import com.google.gson.Gson
 import com.pkk.android.attendance.R
@@ -19,6 +21,8 @@ import com.pkk.android.attendance.misc.CentralVariables
 import com.pkk.android.attendance.misc.Utils
 import com.pkk.android.attendance.models.MessageCodes
 import com.pkk.android.attendance.models.MessageModel
+import com.pkk.android.attendance.viewModels.StudentViewModel
+import com.pkk.android.attendance.viewModels.ViewModelFactory
 import java.net.Inet4Address
 import java.net.NetworkInterface
 import java.net.SocketException
@@ -27,18 +31,17 @@ class StudentFragment : Fragment(), View.OnClickListener {
 
     private var _binding: FragmentStudentBinding? = null
     private val binding get() = _binding!!
-    private var rollNo: String? = null
     private var gson: Gson? = null
     private var message: String? = null
+    private lateinit var viewModelFactory: ViewModelFactory
+    private lateinit var viewModel: StudentViewModel
 
     private val requestPermissionLauncher =
         registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { permissions ->
-            permissions.entries.forEach {
-                val isGranted = it.value
-                if (isGranted) {
-                    openFragment()
-                }
-            }
+            var i = 0
+            permissions.entries.forEach { if (it.value) i++ }
+            if (i == permissions.size)
+                openFragment()
         }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -62,12 +65,20 @@ class StudentFragment : Fragment(), View.OnClickListener {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        _binding = FragmentStudentBinding.inflate(inflater, container, false)
+        _binding = DataBindingUtil.inflate(inflater, R.layout.fragment_student, container, false)
+
+        viewModelFactory = ViewModelFactory()
+        viewModel = ViewModelProvider(this, viewModelFactory).get(StudentViewModel::class.java)
+
+        binding.studentViewModel = viewModel
+        binding.lifecycleOwner = viewLifecycleOwner
+
         initialise()
         return binding.root
     }
 
     private fun initialise() {
+        binding.toolbar.setNavigationOnClickListener { closeCurrentFragment() }
         binding.attendanceStatus.setOnClickListener(this)
         binding.buttonSend.setOnClickListener(this)
         gson = Gson()
@@ -90,8 +101,13 @@ class StudentFragment : Fragment(), View.OnClickListener {
         }
     }
 
+
     private fun requestPermission() {
-        requestPermissionLauncher.launch(arrayOf(Manifest.permission.ACCESS_FINE_LOCATION))
+        requestPermissionLauncher.launch(
+            arrayOf(
+                Manifest.permission.ACCESS_FINE_LOCATION
+            )
+        )
     }
 
     private fun openFragment() {
@@ -110,20 +126,22 @@ class StudentFragment : Fragment(), View.OnClickListener {
         val model = gson!!.fromJson(message, MessageModel::class.java)
         when (model.messageCodes) {
             MessageCodes.NORMAL -> {
-                binding.attendanceStatus.text = getString(R.string.present_marked)
-                binding.attendanceStatus.isClickable = false
-                binding.attendanceStatus.setBackgroundResource(R.drawable.start_button_background)
+                viewModel.setAttendanceStatus(model.isPresent)
+//                binding.attendanceStatus.text = getString(R.string.present_marked)
+//                binding.attendanceStatus.isClickable = false
+//                binding.attendanceStatus.setBackgroundResource(R.drawable.start_button_background)
             }
             MessageCodes.CUSTOM -> {
-                val s = binding.replyFromServerTextView.text.toString()
-                if (s == "null")
-                    return
-                binding.replyFromServerTextView.append(
-                    String.format(
-                        "$s\n From Server : %s",
-                        model.message
-                    )
-                )
+                viewModel.addClientServerMessage(model.message)
+//                val s = binding.replyFromServerTextView.text.toString()
+//                if (s == "null")
+//                    return
+//                binding.replyFromServerTextView.append(
+//                    String.format(
+//                        "$s\n From Server : %s",
+//                        model.message
+//                    )
+//                )
             }
             else -> Utils.showShortToast(
                 requireContext(), model.messageCodes.message
@@ -150,6 +168,10 @@ class StudentFragment : Fragment(), View.OnClickListener {
         (activity as AppCompatActivity).supportActionBar?.show()
     }
 
+    private fun closeCurrentFragment() {
+        requireActivity().onBackPressed()
+    }
+
     companion object {
 
         val localIpAddress: String?
@@ -170,13 +192,6 @@ class StudentFragment : Fragment(), View.OnClickListener {
                     ex.printStackTrace()
                 }
                 return null
-            }
-
-        @JvmStatic
-        fun newInstance() =
-            StudentFragment().apply {
-                arguments = Bundle().apply {
-                }
             }
     }
 }

@@ -11,6 +11,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.cardview.widget.CardView
 import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.ViewModelProvider
 import com.pkk.android.attendance.R
 import com.pkk.android.attendance.connectionSetup.Discoverer
 import com.pkk.android.attendance.databinding.FragmentPulseLayoutBinding
@@ -23,6 +24,8 @@ import com.pkk.android.attendance.misc.SharedPref
 import com.pkk.android.attendance.misc.Utils
 import com.pkk.android.attendance.misc.Utils.Companion.toDp
 import com.pkk.android.attendance.models.DeviceModel
+import com.pkk.android.attendance.viewModels.PulseLayoutViewModel
+import com.pkk.android.attendance.viewModels.ViewModelFactory
 
 class PulseLayoutFragment : Fragment(), PayloadCallbackListener, ConnectionEstablishedListener,
     DeviceSelectedListener, ConnectionCallbackListener {
@@ -35,6 +38,8 @@ class PulseLayoutFragment : Fragment(), PayloadCallbackListener, ConnectionEstab
     private var height: Int = 0
     private var width: Int = 0
     private var radius: Float = 0f
+    private lateinit var viewModelFactory: ViewModelFactory
+    private lateinit var viewModel: PulseLayoutViewModel
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -48,10 +53,14 @@ class PulseLayoutFragment : Fragment(), PayloadCallbackListener, ConnectionEstab
         savedInstanceState: Bundle?
     ): View {
         _binding = FragmentPulseLayoutBinding.inflate(inflater, container, false)
+        viewModelFactory = ViewModelFactory()
+        viewModel = ViewModelProvider(this, viewModelFactory).get(PulseLayoutViewModel::class.java)
+
         binding.toolbar.setNavigationOnClickListener { closeCurrentFragment() }
 
         setBackgroundCard()
-        searchNearbyDevices()
+        if (!viewModel.isRunning)
+            searchNearbyDevices()
         setName(SharedPref.getString(requireContext(), CentralVariables.KEY_USERNAME))
         val profilePic = SharedPref.getInt(requireContext(), CentralVariables.KEY_PROFILE_PIC)
         if (profilePic != -1) setPic(profilePic)
@@ -105,16 +114,13 @@ class PulseLayoutFragment : Fragment(), PayloadCallbackListener, ConnectionEstab
     }
 
     private fun searchNearbyDevices() {
-        binding.pulsator.start()
-        binding.pulsator.setColor(0)
-        binding.pulsator.setAvatars(Utils.getAvatars())
-        binding.pulsator.setListener(this)
         discoverer = Discoverer(requireActivity(), CentralVariables.STAR_STRATEGY, this, this)
         discoverer!!.startDiscovering(this)
+//        viewModel.setRunning(true)
     }
 
     private fun closeCurrentFragment() {
-        requireActivity().supportFragmentManager.popBackStack()
+        requireActivity().onBackPressed()
     }
 
     override fun onDeviceDetected(device: DeviceModel) {
@@ -133,7 +139,7 @@ class PulseLayoutFragment : Fragment(), PayloadCallbackListener, ConnectionEstab
         discoverer!!.sendMessage(message!!)
     }
 
-    override fun onPayloadReceived(message: String?, endpointId: String?) {
+    override fun onPayloadReceived(message: String, endpointId: String?) {
         requireActivity().supportFragmentManager.setFragmentResult(
             CentralVariables.KEY_PULSE_FRAGMENT_MESSAGE_KEY,
             bundleOf(CentralVariables.KEY_MESSAGE to message)
@@ -142,6 +148,7 @@ class PulseLayoutFragment : Fragment(), PayloadCallbackListener, ConnectionEstab
     }
 
     override fun onDestroyView() {
+//        viewModel.setRunning(false)
         if (discoverer != null) {
             discoverer!!.stopDiscovering()
         }
@@ -149,8 +156,10 @@ class PulseLayoutFragment : Fragment(), PayloadCallbackListener, ConnectionEstab
     }
 
     private fun startPulse() {
+        binding.pulsator.setColor(0)
+        binding.pulsator.setAvatars(Utils.getAvatars())
+        binding.pulsator.setListener(this)
         binding.pulsator.post {
-            binding.pulsator.setListener(this)
             binding.pulsator.start()
         }
     }
@@ -159,21 +168,10 @@ class PulseLayoutFragment : Fragment(), PayloadCallbackListener, ConnectionEstab
         requireActivity().runOnUiThread { binding.name.text = displayName }
     }
 
-
     private fun setPic(displayPic: Int) {
         if (displayPic >= 0)
             requireActivity().runOnUiThread {
                 binding.pic.setImageResource(Utils.getAvatars()[displayPic])
-            }
-    }
-
-    companion object {
-        @JvmStatic
-        fun newInstance(message: String?) =
-            PulseLayoutFragment().apply {
-                arguments = Bundle().apply {
-                    putString("message", message)
-                }
             }
     }
 

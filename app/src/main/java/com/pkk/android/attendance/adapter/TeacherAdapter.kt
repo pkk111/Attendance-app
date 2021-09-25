@@ -10,17 +10,13 @@ import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.switchmaterial.SwitchMaterial
 import com.pkk.android.attendance.R
 import com.pkk.android.attendance.adapter.TeacherAdapter.MyViewHolder
+import com.pkk.android.attendance.interfaces.ChangeAttendanceStatusListener
 import com.pkk.android.attendance.misc.MessageExtractor
 import com.pkk.android.attendance.models.StudentModel
 
-class TeacherAdapter(private var context: Context) : RecyclerView.Adapter<MyViewHolder>() {
+class TeacherAdapter(private var context: Context, private var students: List<StudentModel>, private var listener: ChangeAttendanceStatusListener) : RecyclerView.Adapter<MyViewHolder>() {
 
-    private var students: List<StudentModel>? = null
     private var layoutInflater = LayoutInflater.from(context)
-
-    fun setAttendance(students: List<StudentModel>) {
-        this.students = students
-    }
 
     override fun onCreateViewHolder(viewGroup: ViewGroup, i: Int): MyViewHolder {
         val view = layoutInflater.inflate(R.layout.attendance_status, viewGroup, false)
@@ -31,21 +27,22 @@ class TeacherAdapter(private var context: Context) : RecyclerView.Adapter<MyView
         myViewHolder.background.setCardBackgroundColor(
             MessageExtractor.getColour(
                 context,
-                students!![i].isPresent
+                students[i].isPresent
             )
         )
-        myViewHolder.rollno.text = students!![i].rollNo.toString()
-        myViewHolder.status.text = MessageExtractor.getAttendance(students!![i].isPresent)
-        myViewHolder.attendanceSwitch.isChecked = students!![i].isPresent
+        myViewHolder.rollno.text = students[i].rollNo.toString()
+        myViewHolder.status.text = MessageExtractor.getAttendance(students[i].isPresent)
+        myViewHolder.attendanceSwitch.setOnCheckedChangeListener(null)
+        myViewHolder.attendanceSwitch.isChecked = students[i].isPresent
         myViewHolder.attendanceSwitch.setOnCheckedChangeListener { _, b ->
-            MessageExtractor.setStatus(i, b)
+            listener.changeStatusOf(i)
             myViewHolder.background.setCardBackgroundColor(MessageExtractor.getColour(context, b))
             myViewHolder.status.text = MessageExtractor.getAttendance(b)
         }
     }
 
     override fun getItemCount(): Int {
-        return students!!.size
+        return students.size
     }
 
     class MyViewHolder(v: View) : RecyclerView.ViewHolder(v) {
