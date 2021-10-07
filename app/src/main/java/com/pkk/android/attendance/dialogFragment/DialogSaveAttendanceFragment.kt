@@ -12,11 +12,14 @@ import android.widget.ArrayAdapter
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.os.bundleOf
 import androidx.fragment.app.DialogFragment
+import androidx.lifecycle.ViewModelProvider
 import com.pkk.android.attendance.databinding.FragmentDialogSaveAttendanceBinding
 import com.pkk.android.attendance.misc.CentralVariables
-import com.pkk.android.attendance.misc.Utils
+import com.pkk.android.attendance.models.AttendanceDatabase
+import com.pkk.android.attendance.models.ClassDao
 import com.pkk.android.attendance.models.MeetingModel
-import com.pkk.android.attendance.models.StudentModel
+import com.pkk.android.attendance.viewModels.SaveAttendanceViewModel
+import com.pkk.android.attendance.viewModels.ViewModelFactory
 
 class DialogSaveAttendanceFragment : DialogFragment(), AdapterView.OnItemSelectedListener {
 
@@ -24,13 +27,17 @@ class DialogSaveAttendanceFragment : DialogFragment(), AdapterView.OnItemSelecte
     private val binding get() = _binding!!
     private val list = ArrayList<MeetingModel>()
     private val spinnerList = ArrayList<String>()
-    private var attendance = ArrayList<StudentModel>()
+    private lateinit var adapter: ArrayAdapter<String>
+    private lateinit var table: ClassDao
+    private lateinit var viewModelFactory: ViewModelFactory
+    private lateinit var viewModel: SaveAttendanceViewModel
+//    private var attendance = ArrayList<StudentModel>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         arguments?.let {
-            attendance =
-                it.getSerializable(CentralVariables.KEY_MEETING_ID) as ArrayList<StudentModel>
+//            attendance =
+//                it.getSerializable(CentralVariables.KEY_MEETING_ID) as ArrayList<StudentModel>
         }
     }
 
@@ -40,6 +47,17 @@ class DialogSaveAttendanceFragment : DialogFragment(), AdapterView.OnItemSelecte
         savedInstanceState: Bundle?
     ): View {
         _binding = FragmentDialogSaveAttendanceBinding.inflate(LayoutInflater.from(context))
+
+        table = AttendanceDatabase.getDatabase(requireContext()).classDao()
+        viewModelFactory = ViewModelFactory(table)
+        viewModel =
+            ViewModelProvider(this, viewModelFactory).get(SaveAttendanceViewModel::class.java)
+
+        binding.saveAttendanceViewModel = viewModel
+        binding.lifecycleOwner = viewLifecycleOwner
+
+        viewModel.className.observe(this) { list -> setUpAdapter(list) }
+
         //set dialog window
         dialog?.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
         dialog?.window?.requestFeature(Window.FEATURE_NO_TITLE)
@@ -50,18 +68,28 @@ class DialogSaveAttendanceFragment : DialogFragment(), AdapterView.OnItemSelecte
 
     private fun initialize() {
         binding.fragmentSaveAttendanceClassesSpinner.onItemSelectedListener = this
-        //add sample data
-        list.add(MeetingModel(1, "Sample", "details", Utils.getBackgrounds()[0]))
 
-        spinnerList.add("Create New Class")
+        adapter =
+            ArrayAdapter(requireContext(), android.R.layout.simple_spinner_item, spinnerList)
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        binding.fragmentSaveAttendanceClassesSpinner.adapter = adapter
+
         for (i in 0 until list.size)
             spinnerList.add(i + 1, list[i].title)
 
-        val adapter =
-            ArrayAdapter(requireContext(), android.R.layout.simple_spinner_item, spinnerList)
-        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        binding.fragmentSaveAttendanceSave.setOnClickListener {
+            close(
+                false,
+                binding.fragmentSaveAttendanceClassesSpinner.selectedItemId
+            )
+        }
+        binding.fragmentSaveAttendanceDontSave.setOnClickListener { close(false) }
+        binding.fragmentSaveAttendanceCancel.setOnClickListener { close(true) }
+    }
 
-        binding.fragmentSaveAttendanceClassesSpinner.adapter = adapter
+    private fun setUpAdapter(list: List<String>) {
+
+        adapter.addAll(list)
 
         //setting default selected item for better UX
         if (spinnerList.size > 1)
@@ -70,23 +98,37 @@ class DialogSaveAttendanceFragment : DialogFragment(), AdapterView.OnItemSelecte
             binding.fragmentSaveAttendanceClassesSpinner.setSelection(0)
             binding.fragmentSaveAttendanceClassName.visibility = View.VISIBLE
         }
-
-        binding.fragmentSaveAttendanceSave.setOnClickListener { saveAttendance() }
-        binding.fragmentSaveAttendanceDontSave.setOnClickListener { closeDialog(false) }
-        binding.fragmentSaveAttendanceCancel.setOnClickListener { closeDialog(true) }
     }
 
-    private fun closeDialog(isCanceled: Boolean) {
+    private fun close(isCanceled: Boolean, selectedId: Long? = null) {
+        val bundle = bundleOf(CentralVariables.KEY_CANCELLED to isCanceled)
+        if (isCanceled || selectedId == null) {
+            closeDialog(bundle)
+            return
+        }
+        viewModel.saveIndex.observe(this) {
+            if (it != -1L) {
+                bundle.putLong(CentralVariables.KEY_MEETING_ID, it!!)
+                closeDialog(bundle)
+                this.dismiss()
+            }
+        }
+        if (binding.fragmentSaveAttendanceClassName.text.toString().isNotEmpty()) {
+            viewModel.setMeetIdToSaveAttendance(
+                selectedId,
+                binding.fragmentSaveAttendanceClassName.text.toString()
+            )
+        } else {
+            binding.fragmentSaveAttendanceClassName.error = "Empty Class Name"
+        }
+    }
+
+    private fun closeDialog(bundle: Bundle) {
         requireActivity().supportFragmentManager.setFragmentResult(
             CentralVariables.KEY_SAVE_ATTENDANCE_DIALOG_FRAGMENT_MESSAGE,
-            bundleOf(CentralVariables.KEY_CANCELLED to isCanceled)
+            bundle
         )
         this.dismiss()
-    }
-
-    private fun saveAttendance() {
-        closeDialog(false)
-        //TODO save the attendance
     }
 
     override fun onItemSelected(p0: AdapterView<*>?, p1: View?, p2: Int, p3: Long) {

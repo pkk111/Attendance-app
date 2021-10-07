@@ -23,11 +23,11 @@ attendance by clicking on the absent button and entering his attendance when ask
 
 Todo List
 --
-[x] UI make over
-[x] Migrate to Kotlin
-[x] Add Scanning feature to connect to the app
-[x] Conversion to Single Activity App
-[x] A way to change profile pic and username
+[*] UI make over
+[*] Migrate to Kotlin
+[*] Add Scanning feature to connect to the app
+[*] Conversion to Single Activity App
+[*] A way to change profile pic and username
 [] New UI for all alert dialog boxes (For success, Error, In progress and Forms)
 [] Store Attendance in dbms
 [] Convert and class attendance to .xls

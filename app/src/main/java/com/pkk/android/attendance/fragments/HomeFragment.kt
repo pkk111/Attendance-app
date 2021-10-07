@@ -52,12 +52,4 @@ class HomeFragment : Fragment() {
         (activity as AppCompatActivity).supportActionBar?.show()
     }
 
-    companion object {
-        @JvmStatic
-        fun newInstance() =
-            HomeFragment().apply {
-                arguments = Bundle().apply {
-                }
-            }
-    }
 }

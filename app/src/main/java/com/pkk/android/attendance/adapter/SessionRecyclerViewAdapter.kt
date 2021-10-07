@@ -12,7 +12,7 @@ import java.util.*
 
 class SessionRecyclerViewAdapter(
     private val values: List<SessionModel>, private val listener: View.OnClickListener,
-    private val menulistener: View.OnClickListener?
+    private val menulistener: View.OnClickListener
 ) : RecyclerView.Adapter<SessionRecyclerViewAdapter.ViewHolder>() {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
@@ -80,15 +80,13 @@ class SessionRecyclerViewAdapter(
         holder.noOfPresent.text = "${item.noOfPresets}P"
         holder.noOfAbsent.text = "${item.noOfAbsent}A"
 
-        holder.cardBackground.setBackgroundResource(item.res)
+        holder.cardBackground.setBackgroundResource(Utils.getBackgrounds()[item.res])
         holder.cardBackground.setTag(CentralVariables.KEY_SESSION_ID, item.id)
         holder.cardBackground.setOnClickListener(listener)
 
-        if (menulistener != null) {
-            holder.menu.visibility = View.VISIBLE
-            holder.menu.setTag(CentralVariables.KEY_POSITION, position)
-            holder.menu.setOnClickListener(menulistener)
-        }
+        holder.menu.visibility = View.VISIBLE
+        holder.menu.setTag(CentralVariables.KEY_POSITION, position)
+        holder.menu.setOnClickListener(menulistener)
     }
 
     override fun getItemCount(): Int = values.size

@@ -25,7 +25,7 @@ import android.widget.TextView
 import com.pkk.android.attendance.R
 import com.pkk.android.attendance.interfaces.DeviceSelectedListener
 import com.pkk.android.attendance.misc.Utils
-import com.pkk.android.attendance.models.DetectedDevice
+import com.pkk.android.attendance.models.DetectedLocation
 import com.pkk.android.attendance.models.DeviceModel
 import java.util.*
 import kotlin.collections.ArrayList
@@ -48,9 +48,8 @@ class PulseLayout @JvmOverloads constructor(
         const val INTERP_ACCELERATE_DECELERATE = 3
     }
 
-
-    private var layout_width = 0
-    private var layout_height = 0
+    private var layoutWidth = 0
+    private var layoutHeight = 0
 
     private var count = 4
     private var duration = 7000
@@ -59,9 +58,9 @@ class PulseLayout @JvmOverloads constructor(
     private var interpolator = INTERP_LINEAR
     private var textLength = 10
 
-    private var detectedDevicesList: ArrayList<DetectedDevice>
-    private var detectedDevices: HashMap<String, DetectedDevice>
-    private var deviceViews: HashMap<DetectedDevice, View>
+    private var detectedDevicesList: ArrayList<DetectedLocation>
+    private var detectedDevices: HashMap<String, DetectedLocation>
+    private var deviceViews: HashMap<DetectedLocation, View>
     private var avatars = ArrayList<Int>()
     private var random: Random
     private var listener: DeviceSelectedListener? = null
@@ -133,7 +132,7 @@ class PulseLayout @JvmOverloads constructor(
     private fun addImageview(corX: Float, corY: Float, device: DeviceModel) {
         val x = corX - (regions[0]!! / 2f)
         val y = corY - (regions[0]!! / 2f)
-        if (!detectedDevicesList.contains(DetectedDevice(x, y))) {
+        if (!detectedDevicesList.contains(DetectedLocation(x, y))) {
             //Profile coordinates and functionality
             var params = LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT)
             val linearLayout = LinearLayout(context)
@@ -174,11 +173,11 @@ class PulseLayout @JvmOverloads constructor(
             name.filters += InputFilter.LengthFilter(textLength)
             name.ellipsize = TextUtils.TruncateAt.END
             linearLayout.addView(name)
-            val detectedDevice = DetectedDevice(x, y)
-            detectedDevices[device.endpointID] = detectedDevice
-            deviceViews[detectedDevice] = linearLayout
+            val detectedLocation = DetectedLocation(x, y)
+            detectedDevices[device.endpointID] = detectedLocation
+            deviceViews[detectedLocation] = linearLayout
             detectedDeviceView!!.addView(linearLayout)
-            detectedDevicesList.add(detectedDevice)
+            detectedDevicesList.add(detectedLocation)
         }
     }
 
@@ -384,11 +383,11 @@ class PulseLayout @JvmOverloads constructor(
     }
 
     override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
-        layout_width = MeasureSpec.getSize(widthMeasureSpec) - paddingLeft - paddingRight
-        layout_height = MeasureSpec.getSize(heightMeasureSpec) - paddingTop - paddingBottom
-        centerX = layout_width * 0.5f
-        centerY = layout_height * 0.5f
-        radius = layout_width.coerceAtMost(layout_height) * 0.5f
+        layoutWidth = MeasureSpec.getSize(widthMeasureSpec) - paddingLeft - paddingRight
+        layoutHeight = MeasureSpec.getSize(heightMeasureSpec) - paddingTop - paddingBottom
+        centerX = layoutWidth * 0.5f
+        centerY = layoutHeight * 0.5f
+        radius = layoutWidth.coerceAtMost(layoutHeight) * 0.5f
 
         regions.clear()
         for (i in 1 until count)

@@ -18,7 +18,7 @@ import com.pkk.android.attendance.models.DeviceModel
 class Advertiser(private val context: Context, private val strategy: Strategy) :
     ConnectionStatusListeners {
 
-    private val endpoints: HashMap<String, String?> = HashMap()
+    private val endpoints: HashMap<String, DeviceModel> = HashMap()
     private var connectionCallback: ConnectionCallback? = null
     private val hostUsername: String?
         get() = getString(context, CentralVariables.KEY_USERNAME, "")
@@ -66,7 +66,7 @@ class Advertiser(private val context: Context, private val strategy: Strategy) :
     }
 
     override fun onConnectionEstablished(device: DeviceModel) {
-        endpoints[device.endpointID] = device.deviceName
+        endpoints[device.endpointID] = device
     }
 
     override fun onConnectionErrorOccurred(part: String, e: Exception) {
@@ -83,4 +83,9 @@ class Advertiser(private val context: Context, private val strategy: Strategy) :
         endpoints.remove(endpoint)
     }
 
+    fun getDeviceMap(endpoint: String): DeviceModel {
+        if (endpoints.containsKey(endpoint))
+            return endpoints[endpoint]!!
+        throw IllegalArgumentException("Unknown endpoint provided")
+    }
 }

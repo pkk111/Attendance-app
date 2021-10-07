@@ -1,95 +1,106 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content">
+<layout>
 
-    <androidx.cardview.widget.CardView
+    <data>
+
+        <variable
+            name="saveAttendanceViewModel"
+            type="com.pkk.android.attendance.viewModels.SaveAttendanceViewModel" />
+    </data>
+
+    <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:app="http://schemas.android.com/apk/res-auto"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_margin="16dp"
-        app:cardCornerRadius="16dp">
+        android:layout_height="wrap_content">
 
-        <androidx.constraintlayout.widget.ConstraintLayout
+        <androidx.cardview.widget.CardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginStart="8dp"
-            android:layout_marginLeft="8dp"
-            android:layout_marginEnd="8dp"
-            android:layout_marginRight="8dp"
-            android:paddingVertical="16dp">
+            android:layout_margin="16dp"
+            app:cardCornerRadius="16dp">
 
-            <TextView
-                android:id="@+id/fragment_save_attendance_save_to_text"
-                android:layout_width="wrap_content"
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="16dp"
-                android:layout_marginLeft="16dp"
-                android:layout_marginTop="24dp"
-                android:text="@string/save_to"
-                android:textColor="@color/black"
-                android:textSize="18sp"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent" />
+                android:layout_marginStart="8dp"
+                android:layout_marginLeft="8dp"
+                android:layout_marginEnd="8dp"
+                android:layout_marginRight="8dp"
+                android:paddingVertical="16dp">
 
-            <Spinner
-                android:id="@+id/fragment_save_attendance_classes_spinner"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="16dp"
-                android:layout_marginLeft="16dp"
-                app:layout_constraintBottom_toBottomOf="@id/fragment_save_attendance_save_to_text"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toEndOf="@id/fragment_save_attendance_save_to_text" />
+                <TextView
+                    android:id="@+id/fragment_save_attendance_save_to_text"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="16dp"
+                    android:layout_marginLeft="16dp"
+                    android:layout_marginTop="24dp"
+                    android:text="@string/save_to"
+                    android:textColor="@color/black"
+                    android:textSize="18sp"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
 
-            <EditText
-                android:id="@+id/fragment_save_attendance_class_name"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_marginVertical="16dp"
-                android:layout_marginEnd="16dp"
-                android:layout_marginRight="16dp"
-                android:autofillHints="classname"
-                android:hint="@string/meeting_name"
-                android:inputType="text"
-                android:singleLine="true"
-                android:textSize="16sp"
-                android:visibility="gone"
-                app:layout_constraintEnd_toEndOf="@id/fragment_save_attendance_classes_spinner"
-                app:layout_constraintStart_toStartOf="@id/fragment_save_attendance_classes_spinner"
-                app:layout_constraintTop_toBottomOf="@id/fragment_save_attendance_classes_spinner" />
+                <Spinner
+                    android:id="@+id/fragment_save_attendance_classes_spinner"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="16dp"
+                    android:layout_marginLeft="16dp"
+                    app:layout_constraintBottom_toBottomOf="@id/fragment_save_attendance_save_to_text"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toEndOf="@id/fragment_save_attendance_save_to_text" />
 
-            <TextView
-                android:id="@+id/fragment_save_attendance_cancel"
-                style="@style/AppTheme.AlertDialogButton.Negative"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/cancel"
-                app:layout_constraintBottom_toBottomOf="@id/fragment_save_attendance_save"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="@id/fragment_save_attendance_save" />
+                <EditText
+                    android:id="@+id/fragment_save_attendance_class_name"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginVertical="16dp"
+                    android:layout_marginEnd="16dp"
+                    android:layout_marginRight="16dp"
+                    android:autofillHints="classname"
+                    android:hint="@string/meeting_name"
+                    android:inputType="text"
+                    android:singleLine="true"
+                    android:textSize="16sp"
+                    android:visibility="gone"
+                    app:layout_constraintEnd_toEndOf="@id/fragment_save_attendance_classes_spinner"
+                    app:layout_constraintStart_toStartOf="@id/fragment_save_attendance_classes_spinner"
+                    app:layout_constraintTop_toBottomOf="@id/fragment_save_attendance_classes_spinner" />
 
-            <TextView
-                android:id="@+id/fragment_save_attendance_dont_save"
-                style="@style/AppTheme.AlertDialogButton.Positive"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/dont_save"
-                app:layout_constraintBottom_toBottomOf="@id/fragment_save_attendance_save"
-                app:layout_constraintEnd_toStartOf="@id/fragment_save_attendance_save"
-                app:layout_constraintTop_toTopOf="@id/fragment_save_attendance_save" />
+                <TextView
+                    android:id="@+id/fragment_save_attendance_cancel"
+                    style="@style/AppTheme.AlertDialogButton.Negative"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/cancel"
+                    app:layout_constraintBottom_toBottomOf="@id/fragment_save_attendance_save"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="@id/fragment_save_attendance_save" />
 
-            <TextView
-                android:id="@+id/fragment_save_attendance_save"
-                style="@style/AppTheme.AlertDialogButton.Positive"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="36dp"
-                android:text="@string/save"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toEndOf="@id/fragment_save_attendance_classes_spinner"
-                app:layout_constraintTop_toBottomOf="@id/fragment_save_attendance_class_name" />
-        </androidx.constraintlayout.widget.ConstraintLayout>
-    </androidx.cardview.widget.CardView>
+                <TextView
+                    android:id="@+id/fragment_save_attendance_dont_save"
+                    style="@style/AppTheme.AlertDialogButton.Positive"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/dont_save"
+                    app:layout_constraintBottom_toBottomOf="@id/fragment_save_attendance_save"
+                    app:layout_constraintEnd_toStartOf="@id/fragment_save_attendance_save"
+                    app:layout_constraintTop_toTopOf="@id/fragment_save_attendance_save" />
 
-</FrameLayout>
+                <TextView
+                    android:id="@+id/fragment_save_attendance_save"
+                    style="@style/AppTheme.AlertDialogButton.Positive"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="36dp"
+                    android:text="@string/save"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="@id/fragment_save_attendance_classes_spinner"
+                    app:layout_constraintTop_toBottomOf="@id/fragment_save_attendance_class_name" />
+            </androidx.constraintlayout.widget.ConstraintLayout>
+        </androidx.cardview.widget.CardView>
+
+    </FrameLayout>
+
+</layout>

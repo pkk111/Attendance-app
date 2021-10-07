@@ -23,4 +23,5 @@ object CentralVariables {
     const val KEY_START: String = "start"
     const val KEY_END: String = "end"
     const val Key_ROLL_NO: String = "Roll Number"
+    const val KEY_DEVICE: String = "device"
 }

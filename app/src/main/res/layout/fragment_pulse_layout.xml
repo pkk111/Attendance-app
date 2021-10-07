@@ -35,6 +35,7 @@
         app:pulse_color="@color/white"
         app:pulse_count="4"
         app:pulse_duration="4000"
+        android:background="@color/transparent"
         app:pulse_interpolator="Linear"
         app:pulse_repeat="INFINITE"
         app:pulse_startFromScratch="true">

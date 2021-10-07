@@ -13,7 +13,7 @@ import java.util.*
 
 class ConnectionCallback(
     var context: Context,
-    var payloadCallback: PayloadCallback,
+    private var payloadCallback: PayloadCallback,
     var listeners: ConnectionStatusListeners
 ) {
 
@@ -23,18 +23,19 @@ class ConnectionCallback(
         return object : EndpointDiscoveryCallback() {
             override fun onEndpointFound(endpointId: String, info: DiscoveredEndpointInfo) {
                 // An endpoint was found. We request a connection to it.
-                names!![endpointId] = info.endpointName
+                names[endpointId] = DeviceModel(
+                    endpointId,
+                    info.endpointName,
+                    info.endpointInfo
+                )
                 deviceCallbackListener.onDeviceDetected(
-                    DeviceModel(
-                        endpointId,
-                        names!![endpointId]
-                    )
+                    names[endpointId]!!
                 )
             }
 
             override fun onEndpointLost(endpointId: String) {
                 // A previously discovered endpoint has gone away.
-                names!!.remove(endpointId)
+                names.remove(endpointId)
                 deviceCallbackListener.onDeviceLost(endpointId)
             }
         }
@@ -63,7 +64,8 @@ class ConnectionCallback(
                 listeners.onConnectionRequested(
                     DeviceModel(
                         endpointId,
-                        connectionInfo.endpointName
+                        connectionInfo.endpointName,
+                        connectionInfo.endpointInfo
                     ), connectionInfo.authenticationDigits
                 )
             }
@@ -71,19 +73,14 @@ class ConnectionCallback(
             override fun onConnectionResult(endpointId: String, result: ConnectionResolution) {
                 when (result.status.statusCode) {
                     ConnectionsStatusCodes.STATUS_OK -> {
-                        listeners.onConnectionEstablished(
-                            DeviceModel(
-                                endpointId,
-                                names!![endpointId]
-                            )
-                        )
+                        listeners.onConnectionEstablished(if (names.containsKey(endpointId)) names[endpointId]!! else DeviceModel())
                     }
                     ConnectionsStatusCodes.STATUS_CONNECTION_REJECTED -> {
-                        names!!.remove(endpointId)
+                        names.remove(endpointId)
                         showShortToast(context, "Connection Denied")
                     }
                     ConnectionsStatusCodes.STATUS_ERROR -> {
-                        names!!.remove(endpointId)
+                        names.remove(endpointId)
                         showShortToast(context, "Error occurred, Please try again")
                     }
                     else -> {
@@ -92,19 +89,19 @@ class ConnectionCallback(
             }
 
             override fun onDisconnected(endpointId: String) {
-                if (names!!.containsKey(endpointId)) {
-                    names!!.remove(endpointId)
+                if (names.containsKey(endpointId)) {
+                    names.remove(endpointId)
                     listeners.onConnectionDisconnected(endpointId)
                 }
             }
         }
 
     fun acceptConnectionRequest(device: DeviceModel) {
-        names!![device.endpointID] = device.deviceName!!
+        names[device.endpointID] = device
         Nearby.getConnectionsClient(context).acceptConnection(device.endpointID, payloadCallback)
     }
 
     companion object {
-        var names: HashMap<String, String>? = HashMap()
+        var names: HashMap<String, DeviceModel> = HashMap()
     }
 }

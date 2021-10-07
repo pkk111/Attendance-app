@@ -23,6 +23,9 @@ import com.pkk.android.attendance.interfaces.ChangeAttendanceStatusListener
 import com.pkk.android.attendance.interfaces.PayloadCallbackListener
 import com.pkk.android.attendance.misc.CentralVariables
 import com.pkk.android.attendance.misc.Utils
+import com.pkk.android.attendance.models.AttendanceDao
+import com.pkk.android.attendance.models.AttendanceDatabase
+import com.pkk.android.attendance.models.SessionDao
 import com.pkk.android.attendance.viewModels.TeacherViewModel
 import com.pkk.android.attendance.viewModels.ViewModelFactory
 
@@ -35,6 +38,8 @@ class TeacherFragment : Fragment(), View.OnClickListener, PayloadCallbackListene
     private var advertiser: Advertiser? = null
     private lateinit var viewModelFactory: ViewModelFactory
     private lateinit var viewModel: TeacherViewModel
+    private lateinit var attendanceTable: AttendanceDao
+    private lateinit var sessionTable: SessionDao
 
     private val requestPermissionLauncher =
         registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { permissions ->
@@ -55,7 +60,10 @@ class TeacherFragment : Fragment(), View.OnClickListener, PayloadCallbackListene
             CentralVariables.KEY_SAVE_ATTENDANCE_DIALOG_FRAGMENT_MESSAGE,
             this
         ) { _, bundle ->
-            stopTakingAttendance(bundle.getBoolean(CentralVariables.KEY_CANCELLED, false))
+            stopTakingAttendance(
+                bundle.getBoolean(CentralVariables.KEY_CANCELLED, false),
+                bundle.getLong(CentralVariables.KEY_MEETING_ID, -1L)
+            )
         }
         requireActivity().supportFragmentManager.setFragmentResultListener(
             CentralVariables.KEY_START_ATTENDANCE_DIALOG_FRAGMENT_MESSAGE,
@@ -81,7 +89,10 @@ class TeacherFragment : Fragment(), View.OnClickListener, PayloadCallbackListene
         savedInstanceState: Bundle?
     ): View {
         _binding = DataBindingUtil.inflate(inflater, R.layout.fragment_teacher, container, false)
-        viewModelFactory = ViewModelFactory()
+
+        sessionTable = AttendanceDatabase.getDatabase(requireContext()).sessionDao()
+        attendanceTable = AttendanceDatabase.getDatabase(requireContext()).attendanceDao()
+        viewModelFactory = ViewModelFactory(sessionTable, attendanceTable)
         viewModel = ViewModelProvider(this, viewModelFactory).get(TeacherViewModel::class.java)
 
         binding.teacherViewModel = viewModel
@@ -96,7 +107,7 @@ class TeacherFragment : Fragment(), View.OnClickListener, PayloadCallbackListene
         binding.buttonReceiving.setOnClickListener(this)
         binding.refresh.setOnClickListener(this)
         binding.addRollNumber.setOnClickListener(this)
-//        viewModel.isRunning.observe(viewLifecycleOwner) {b -> if(b) startTakingAttendance(false, viewModel.start, viewModel.end)}
+        viewModel.isRunning.observe(viewLifecycleOwner) { if (!it!!) stopAllProcesses() }
         if (viewModel.isRunning.value!!)
             startTakingAttendance(false, viewModel.start, viewModel.end)
     }
@@ -126,18 +137,18 @@ class TeacherFragment : Fragment(), View.OnClickListener, PayloadCallbackListene
         if (!isCancelled) {
             if (!viewModel.isRunning.value!!) {
                 viewModel.startRunning(start, end)
-                advertiser = Advertiser(requireContext(), CentralVariables.P2P_STRATEGY)
+                advertiser = Advertiser(requireContext(), CentralVariables.STAR_STRATEGY)
                 advertiser!!.startAdvertising(this)
             }
             setRecyclerView()
         }
     }
 
-    private fun stopTakingAttendance(isCancelled: Boolean) {
+    private fun stopTakingAttendance(isCancelled: Boolean, id: Long) {
         if (!isCancelled) {
-            viewModel.stopRunning()
-            advertiser?.stopAdvertising()
-            teacherAdapter?.notifyItemRangeRemoved(0, viewModel.getSize())
+            if (id != -1L) {
+                viewModel.saveAttendanceAt(id)
+            } else viewModel.stopRunning()
         }
     }
 
@@ -152,13 +163,13 @@ class TeacherFragment : Fragment(), View.OnClickListener, PayloadCallbackListene
             Utils.showShortToast(requireContext(), "$roll already present for evaluation.")
     }
 
-    override fun onPayloadReceived(message: String, endpointId: String?) {
-        val result = viewModel.markAttendance(message)
+    override fun onPayloadReceived(message: String, endpointId: String) {
+        val result = viewModel.markAttendance(message, advertiser!!.getDeviceMap(endpointId))
         if (result.first == -1)
             binding.textFromClient.append(String.format("\nFrom Client: %s", result.second))
         else
             teacherAdapter?.notifyItemChanged(result.first)
-        PayloadHandler(requireContext()).sendString(endpointId!!, result.second)
+        PayloadHandler(requireContext()).sendString(endpointId, result.second)
         advertiser!!.disconnect(endpointId)
     }
 
@@ -177,15 +188,18 @@ class TeacherFragment : Fragment(), View.OnClickListener, PayloadCallbackListene
         teacherAdapter!!.notifyItemChanged(index)
     }
 
+    fun stopAllProcesses() {
+        advertiser?.stopAdvertising()
+        teacherAdapter?.notifyItemRangeRemoved(0, viewModel.getSize())
+    }
+
     private fun closeCurrentFragment() {
-        requireActivity().supportFragmentManager.popBackStack()
+        requireActivity().onBackPressed()
     }
 
     override fun onDestroyView() {
-        viewModel.stopRunning()
-        if(advertiser!=null) {
-            advertiser?.stopAdvertising()
-        }
+        viewModel.stopRunningWithoutSaving()
+        advertiser?.stopAdvertising()
         super.onDestroyView()
     }
 

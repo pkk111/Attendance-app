@@ -57,7 +57,6 @@ class PulseLayoutFragment : Fragment(), PayloadCallbackListener, ConnectionEstab
         viewModel = ViewModelProvider(this, viewModelFactory).get(PulseLayoutViewModel::class.java)
 
         binding.toolbar.setNavigationOnClickListener { closeCurrentFragment() }
-
         setBackgroundCard()
         if (!viewModel.isRunning)
             searchNearbyDevices()
@@ -139,10 +138,12 @@ class PulseLayoutFragment : Fragment(), PayloadCallbackListener, ConnectionEstab
         discoverer!!.sendMessage(message!!)
     }
 
-    override fun onPayloadReceived(message: String, endpointId: String?) {
+    override fun onPayloadReceived(message: String, endpointId: String) {
         requireActivity().supportFragmentManager.setFragmentResult(
             CentralVariables.KEY_PULSE_FRAGMENT_MESSAGE_KEY,
-            bundleOf(CentralVariables.KEY_MESSAGE to message)
+            bundleOf(
+                CentralVariables.KEY_MESSAGE to message
+            )
         )
         closeCurrentFragment()
     }

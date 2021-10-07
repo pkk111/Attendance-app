@@ -7,21 +7,29 @@ import android.view.ViewGroup
 import android.widget.PopupMenu
 import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.NavHostFragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.pkk.android.attendance.R
 import com.pkk.android.attendance.adapter.SessionRecyclerViewAdapter
 import com.pkk.android.attendance.databinding.FragmentSessionBinding
 import com.pkk.android.attendance.misc.CentralVariables
-import com.pkk.android.attendance.misc.Utils
+import com.pkk.android.attendance.models.AttendanceDatabase
+import com.pkk.android.attendance.models.SessionDao
 import com.pkk.android.attendance.models.SessionModel
-import java.util.*
-import kotlin.collections.ArrayList
+import com.pkk.android.attendance.viewModels.SessionsViewModel
+import com.pkk.android.attendance.viewModels.ViewModelFactory
 
 class SessionsFragment : Fragment() {
+
     private var _binding: FragmentSessionBinding? = null
     private val binding get() = _binding!!
+    private lateinit var table: SessionDao
+    private lateinit var viewModelFactory: ViewModelFactory
+    private lateinit var viewModel: SessionsViewModel
+    private lateinit var adapter: SessionRecyclerViewAdapter
 
+    private var meetingId: Long = -1L
     private val onClickListener = View.OnClickListener { v ->
         NavHostFragment.findNavController(this).navigate(
             R.id.action_sessionsFragment_to_showAttendanceFragment,
@@ -45,13 +53,11 @@ class SessionsFragment : Fragment() {
         menu.show()
     }
 
-    private var meetingId: Int = -1
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         arguments?.let {
-            meetingId = it.getInt(CentralVariables.KEY_ID)
+            meetingId = it.getLong(CentralVariables.KEY_ID)
         }
     }
 
@@ -60,35 +66,26 @@ class SessionsFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View {
         _binding = FragmentSessionBinding.inflate(inflater, container, false)
-        val sessionList = ArrayList<SessionModel>()
-        sessionList.add(
-            SessionModel(
-                0,
-                Calendar.getInstance().time,
-                Calendar.getInstance().time,
-                50,
-                5,
-                Utils.getBackgrounds()[0]
-            )
-        )
 
-        // Set the adapter
-        if (sessionList.size > 0)
-            with(binding.sessionList) {
-                layoutManager = LinearLayoutManager(context)
-                adapter = SessionRecyclerViewAdapter(sessionList, onClickListener, menuListener)
-            }
-        else
-            binding.fragmentMeetingTextView.visibility = View.VISIBLE
+        table = AttendanceDatabase.getDatabase(requireContext()).sessionDao()
+        viewModelFactory = ViewModelFactory(table)
+        viewModel =
+            ViewModelProvider(this, viewModelFactory).get(SessionsViewModel::class.java)
+
+        viewModel.loadData(meetingId)
+        viewModel.sessions.observe(viewLifecycleOwner) { list -> updateUI(list) }
+
+        binding.sessionList.layoutManager = LinearLayoutManager(context)
         return binding.root
     }
 
-    companion object {
-        @JvmStatic
-        fun newInstance() =
-            SessionsFragment().apply {
-                arguments = Bundle().apply {
-                }
-            }
+    private fun updateUI(list: List<SessionModel>) {
+        if (list.isEmpty())
+            binding.fragmentMeetingTextView.visibility = View.VISIBLE
+        else {
+            binding.fragmentMeetingTextView.visibility = View.GONE
+            adapter = SessionRecyclerViewAdapter(list, onClickListener, menuListener)
+            binding.sessionList.adapter = adapter
+        }
     }
 }

@@ -8,6 +8,7 @@ import android.os.Build
 import android.util.TypedValue
 import android.widget.Toast
 import com.pkk.android.attendance.R
+import kotlin.random.Random
 
 
 class Utils {
@@ -89,6 +90,11 @@ class Utils {
                 3 -> "${n}rd"
                 else -> "${n}th"
             }
+        }
+
+        fun getRandomBackground(): Int {
+            val size = getBackgrounds().size
+            return Random(System.nanoTime()).nextInt(size)
         }
     }
 }

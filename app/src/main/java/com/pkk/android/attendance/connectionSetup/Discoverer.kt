@@ -2,7 +2,6 @@ package com.pkk.android.attendance.connectionSetup
 
 import android.app.Activity
 import android.app.AlertDialog
-import android.content.Context
 import android.util.Log
 import com.google.android.gms.nearby.Nearby
 import com.google.android.gms.nearby.connection.DiscoveryOptions

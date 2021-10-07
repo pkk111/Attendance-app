@@ -1,8 +1,7 @@
 <resources>
     <string name="app_name">Attendance</string>
     <string name="toast_message">Toast message</string>
-    <string name="rollnumber">Roll No.</string>
-    <string name="attendence_status">Status</string>
+    <string name="attendance_status">Status</string>
     <string name="username">Username</string>
     <string name="password">Password</string>
     <string name="teacher">Teacher</string>
@@ -19,7 +18,7 @@
     <string name="admin_powers">Admin powers</string>
     <string name="stop">Stop</string>
     <string name="start">Start</string>
-    <string name="file_preference">com.pkk.android.attendence.FILE_PREFERENCE_KEY</string>
+    <string name="file_preference">com.pkk.android.attendance.FILE_PREFERENCE_KEY</string>
     <string name="present_marked">Present \n Marked</string>
     <string name="title_activity_teacher2">TeacherActivity2</string>
     <string name="tab_text_1">Tab 1</string>

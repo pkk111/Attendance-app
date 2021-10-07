@@ -2,6 +2,7 @@ package com.pkk.android.attendance.misc
 
 import android.util.Log
 import com.google.gson.Gson
+import com.pkk.android.attendance.models.DeviceModel
 import com.pkk.android.attendance.models.MessageCodes
 import com.pkk.android.attendance.models.MessageModel
 
@@ -12,16 +13,16 @@ class AttendanceMarker(
     private val gson: Gson = Gson()
     private var messageModel: MessageModel? = null
 
-    fun markAttendance(inputJsonMessage: String): Pair<Int, String> {
+    fun markAttendance(inputJsonMessage: String, device: DeviceModel): Pair<Int, String> {
         try {
             messageModel = gson.fromJson(inputJsonMessage, MessageModel::class.java)
         } catch (e: Exception) {
             Log.e("Error converting", "message is $inputJsonMessage\n\tException is $e")
         }
-        return processMessage(messageModel!!)
+        return processMessage(messageModel!!, device)
     }
 
-    private fun processMessage(m: MessageModel): Pair<Int, String> {
+    private fun processMessage(m: MessageModel, device: DeviceModel): Pair<Int, String> {
         var outputString = ""
         var outputCode = -1
         val output = MessageModel()
@@ -33,7 +34,8 @@ class AttendanceMarker(
                 val ip = m.ip!!
                 if (messageExtractor.isIPAddressUnique(ip)) {
                     //Updating the dataset after validation
-                    val index = messageExtractor.updateRollNoDetails(m.rollNo, ip, m.isPresent)
+                    val index =
+                        messageExtractor.updateRollNoDetails(m.rollNo, ip, m.isPresent, device)
                     outputCode = index
                     output.messageCodes = MessageCodes.NORMAL
                     output.isPresent = messageExtractor.getStatus(m.rollNo)

@@ -3,15 +3,19 @@ package com.pkk.android.attendance.misc
 import android.content.Context
 import androidx.core.content.ContextCompat
 import com.pkk.android.attendance.R
-import com.pkk.android.attendance.misc.Utils.Companion.showShortToast
+import com.pkk.android.attendance.models.DeviceModel
 import com.pkk.android.attendance.models.StudentModel
 import java.util.*
 
 class MessageExtractor(start: Int, end: Int) {
 
+    private var _students: MutableList<StudentModel> = ArrayList()
+    val students: List<StudentModel>
+        get() = _students
+
     fun isIPAddressUnique(ip: String): Boolean {
-        if (Companion.students.isNotEmpty()) for (x in Companion.students.indices) {
-            if (Companion.students[x].ipAddress.isNotEmpty() && Companion.students[x].ipAddress == ip) {
+        if (_students.isNotEmpty()) for (x in _students.indices) {
+            if (!_students[x].ipAddress.isNullOrEmpty() && _students[x].ipAddress == ip) {
                 return false
             }
         }
@@ -19,17 +23,24 @@ class MessageExtractor(start: Int, end: Int) {
     }
 
     fun validateRollNo(rollNo: Int): Boolean {
-        for (x in Companion.students.indices)
-            if (Companion.students[x].rollNo == rollNo)
+        for (x in _students.indices)
+            if (_students[x].rollNo == rollNo)
                 return true
         return false
     }
 
-    fun updateRollNoDetails(rollNo: Int, ip: String?, present: Boolean): Int {
-        for (x in Companion.students.indices) {
-            val student = Companion.students[x]
+    fun updateRollNoDetails(rollNo: Int, ip: String?, present: Boolean, device: DeviceModel): Int {
+        for (x in _students.indices) {
+            val student = _students[x]
             if (student.rollNo == rollNo) {
-                Companion.students[x] = StudentModel(rollNo, present, ip)
+                _students[x] = StudentModel.getInstance(
+                    rollNo,
+                    present,
+                    ip,
+                    device.deviceName,
+                    device.deviceInfo,
+                    0
+                )
                 return x
             }
         }
@@ -37,30 +48,26 @@ class MessageExtractor(start: Int, end: Int) {
     }
 
     fun addStud(rollNo: Int): Boolean {
-        for (student in Companion.students) {
+        for (student in _students) {
             if (student.rollNo == rollNo) {
                 return false
             }
         }
-        Companion.students.add(StudentModel(rollNo))
+        _students.add(StudentModel.getInstance(rollNo))
         return true
     }
 
     fun getStatus(roll_no: Int): Boolean {
-        for (student in Companion.students) if (student.rollNo == roll_no) return student.isPresent
+        for (student in students) if (student.rollNo == roll_no) return student.isPresent
         return false
     }
 
-    val students: List<StudentModel>
-        get() = Companion.students
-
     fun setStatus(index: Int, status: Boolean) {
-        val oldStudent = Companion.students[index]
-        Companion.students[index] = StudentModel(oldStudent.rollNo, status, null)
+        val oldStudent = _students[index]
+        _students[index] = StudentModel(oldStudent.id, oldStudent.rollNo, status, null)
     }
-    companion object {
 
-        private var students: MutableList<StudentModel> = ArrayList()
+    companion object {
 
         fun getColour(context: Context, bool: Boolean): Int {
             return if (bool) ContextCompat.getColor(
@@ -72,13 +79,22 @@ class MessageExtractor(start: Int, end: Int) {
         fun getAttendance(bool: Boolean): String {
             return if (bool) "Present" else "Absent"
         }
+    }
 
+    fun clear() {
+        _students.clear()
+    }
+
+    fun setSessionId(sessionId: Long) {
+        for (element in _students) {
+            element.sessionId = sessionId
+        }
     }
 
     init {
-        Companion.students.clear()
+        _students.clear()
         for (x in start..end) {
-            Companion.students.add(StudentModel(x))
+            _students.add(StudentModel.getInstance(x))
         }
     }
 }

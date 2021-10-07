@@ -26,12 +26,4 @@ class FeedbackFragment : Fragment() {
         return binding.root
     }
 
-    companion object {
-        @JvmStatic
-        fun newInstance() =
-            FeedbackFragment().apply {
-                arguments = Bundle().apply {
-                }
-            }
-    }
 }

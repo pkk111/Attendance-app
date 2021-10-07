@@ -14,6 +14,7 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.NavHostFragment
 import com.google.gson.Gson
+import com.google.gson.GsonBuilder
 import com.pkk.android.attendance.R
 import com.pkk.android.attendance.databinding.FragmentStudentBinding
 import com.pkk.android.attendance.dialogFragment.DialogEnterRollNumberFragment
@@ -23,15 +24,16 @@ import com.pkk.android.attendance.models.MessageCodes
 import com.pkk.android.attendance.models.MessageModel
 import com.pkk.android.attendance.viewModels.StudentViewModel
 import com.pkk.android.attendance.viewModels.ViewModelFactory
-import java.net.Inet4Address
+import java.net.Inet6Address
 import java.net.NetworkInterface
 import java.net.SocketException
+import java.util.*
 
-class StudentFragment : Fragment(), View.OnClickListener {
+class StudentFragment : Fragment() {
 
     private var _binding: FragmentStudentBinding? = null
     private val binding get() = _binding!!
-    private var gson: Gson? = null
+    private lateinit var gson: Gson
     private var message: String? = null
     private lateinit var viewModelFactory: ViewModelFactory
     private lateinit var viewModel: StudentViewModel
@@ -78,74 +80,25 @@ class StudentFragment : Fragment(), View.OnClickListener {
     }
 
     private fun initialise() {
+        gson = GsonBuilder().enableComplexMapKeySerialization().create()
+
         binding.toolbar.setNavigationOnClickListener { closeCurrentFragment() }
-        binding.attendanceStatus.setOnClickListener(this)
-        binding.buttonSend.setOnClickListener(this)
-        gson = Gson()
-    }
+        binding.attendanceStatus.setOnClickListener {
 
-    override fun onClick(v: View) {
-        when (v.id) {
-            R.id.buttonSend -> {
-                val m =
-                    MessageModel(MessageCodes.CUSTOM, binding.sendMessageEditText.text.toString())
-                message = gson!!.toJson(m)
-                requestPermission()
-            }
-            R.id.attendanceStatus -> {
-                DialogEnterRollNumberFragment().show(
-                    childFragmentManager,
-                    DialogEnterRollNumberFragment.TAG
-                )
-            }
+            DialogEnterRollNumberFragment().show(
+                childFragmentManager,
+                DialogEnterRollNumberFragment.TAG
+            )
         }
-    }
-
-
-    private fun requestPermission() {
-        requestPermissionLauncher.launch(
-            arrayOf(
-                Manifest.permission.ACCESS_FINE_LOCATION
-            )
-        )
-    }
-
-    private fun openFragment() {
-        try {
-            NavHostFragment.findNavController(this).navigate(
-                R.id.action_studentFragment_to_pulseLayoutFragment, bundleOf(
-                    CentralVariables.KEY_MESSAGE to message
+        binding.buttonSend.setOnClickListener {
+            val m =
+                MessageModel(
+                    MessageCodes.CUSTOM,
+                    binding.sendMessageEditText.text.toString()
                 )
-            )
-        } catch (e: Exception) {
-            Log.e("error", "exception is $e")
-        }
-    }
-
-    private fun updateUI(message: String?) {
-        val model = gson!!.fromJson(message, MessageModel::class.java)
-        when (model.messageCodes) {
-            MessageCodes.NORMAL -> {
-                viewModel.setAttendanceStatus(model.isPresent)
-//                binding.attendanceStatus.text = getString(R.string.present_marked)
-//                binding.attendanceStatus.isClickable = false
-//                binding.attendanceStatus.setBackgroundResource(R.drawable.start_button_background)
-            }
-            MessageCodes.CUSTOM -> {
-                viewModel.addClientServerMessage(model.message)
-//                val s = binding.replyFromServerTextView.text.toString()
-//                if (s == "null")
-//                    return
-//                binding.replyFromServerTextView.append(
-//                    String.format(
-//                        "$s\n From Server : %s",
-//                        model.message
-//                    )
-//                )
-            }
-            else -> Utils.showShortToast(
-                requireContext(), model.messageCodes.message
-            )
+            message = gson.toJson(m)
+            Log.d("json = ", message!!)
+            requestPermission()
         }
     }
 
@@ -154,8 +107,35 @@ class StudentFragment : Fragment(), View.OnClickListener {
         model.rollNo = rollNo
         model.isPresent = true
         model.ip = localIpAddress
-        message = gson!!.toJson(model)
+        message = gson.toJson(model)
         requestPermission()
+    }
+
+    private fun requestPermission() {
+        requestPermissionLauncher.launch(arrayOf(Manifest.permission.ACCESS_FINE_LOCATION))
+    }
+
+    private fun openFragment() {
+        NavHostFragment.findNavController(this).navigate(
+            R.id.action_studentFragment_to_pulseLayoutFragment, bundleOf(
+                CentralVariables.KEY_MESSAGE to message
+            )
+            )
+    }
+
+    private fun updateUI(message: String?) {
+        val model = gson.fromJson(message, MessageModel::class.java)
+        when (model.messageCodes) {
+            MessageCodes.NORMAL -> {
+                viewModel.setAttendanceStatus(model.isPresent)
+            }
+            MessageCodes.CUSTOM -> {
+                viewModel.addClientServerMessage(model.message)
+            }
+            else -> Utils.showShortToast(
+                requireContext(), model.messageCodes.message
+            )
+        }
     }
 
     override fun onResume() {
@@ -173,17 +153,14 @@ class StudentFragment : Fragment(), View.OnClickListener {
     }
 
     companion object {
-
         val localIpAddress: String?
             get() {
                 try {
-                    val en = NetworkInterface.getNetworkInterfaces()
-                    while (en.hasMoreElements()) {
-                        val intf = en.nextElement()
+                    val en = Collections.list(NetworkInterface.getNetworkInterfaces())
+                    for (intf in en) {
                         val enumIpAddr = intf.inetAddresses
-                        while (enumIpAddr.hasMoreElements()) {
-                            val inetAddress = enumIpAddr.nextElement()
-                            if (!inetAddress.isLoopbackAddress && inetAddress is Inet4Address) {
+                        for (inetAddress in enumIpAddr) {
+                            if (!inetAddress.isLoopbackAddress && inetAddress is Inet6Address) {
                                 return inetAddress.getHostAddress()
                             }
                         }
