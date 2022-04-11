@@ -15,8 +15,8 @@ import androidx.fragment.app.DialogFragment
 import androidx.lifecycle.ViewModelProvider
 import com.pkk.android.attendance.databinding.FragmentDialogSaveAttendanceBinding
 import com.pkk.android.attendance.misc.CentralVariables
-import com.pkk.android.attendance.models.AttendanceDatabase
-import com.pkk.android.attendance.models.ClassDao
+import com.pkk.android.attendance.database.AttendanceDatabase
+import com.pkk.android.attendance.database.ClassDao
 import com.pkk.android.attendance.models.MeetingModel
 import com.pkk.android.attendance.viewModels.SaveAttendanceViewModel
 import com.pkk.android.attendance.viewModels.ViewModelFactory

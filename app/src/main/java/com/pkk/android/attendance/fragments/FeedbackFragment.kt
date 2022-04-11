@@ -6,6 +6,9 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import com.pkk.android.attendance.databinding.FragmentFeedbackBinding
+import android.content.Intent
+import android.net.Uri
+
 
 class FeedbackFragment : Fragment() {
 
@@ -26,4 +29,12 @@ class FeedbackFragment : Fragment() {
         return binding.root
     }
 
+    fun sendEmail(){
+        val emailIntent = Intent(Intent.ACTION_SEND)
+        emailIntent.setData(Uri.parse("mailto:"))
+        emailIntent.setType("text/plain")
+        emailIntent.putExtra(Intent.EXTRA_EMAIL  , Array(1){"Recipient"})
+        emailIntent.putExtra(Intent.EXTRA_SUBJECT, "subject")
+        emailIntent.putExtra(Intent.EXTRA_TEXT   , "Message Body")
+    }
 }

@@ -1,6 +1,7 @@
-package com.pkk.android.attendance.models
+package com.pkk.android.attendance.database
 
 import androidx.room.*
+import com.pkk.android.attendance.models.MeetingModel
 
 @Dao
 interface ClassDao {

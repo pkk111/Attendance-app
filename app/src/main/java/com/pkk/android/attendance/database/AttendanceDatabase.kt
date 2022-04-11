@@ -1,4 +1,4 @@
-package com.pkk.android.attendance.models
+package com.pkk.android.attendance.database
 
 import android.content.Context
 import androidx.room.Database
@@ -6,6 +6,9 @@ import androidx.room.Room
 import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
 import com.pkk.android.attendance.misc.Converters
+import com.pkk.android.attendance.models.MeetingModel
+import com.pkk.android.attendance.models.SessionModel
+import com.pkk.android.attendance.models.StudentModel
 
 @Database(
     entities = [StudentModel::class, MeetingModel::class, SessionModel::class],

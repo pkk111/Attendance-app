@@ -15,6 +15,9 @@ import com.pkk.android.attendance.R
 import com.pkk.android.attendance.adapter.TeacherAdapter
 import com.pkk.android.attendance.connectionSetup.Advertiser
 import com.pkk.android.attendance.connectionSetup.PayloadHandler
+import com.pkk.android.attendance.database.AttendanceDao
+import com.pkk.android.attendance.database.AttendanceDatabase
+import com.pkk.android.attendance.database.SessionDao
 import com.pkk.android.attendance.databinding.FragmentTeacherBinding
 import com.pkk.android.attendance.dialogFragment.DialogAttendanceRangeFragment
 import com.pkk.android.attendance.dialogFragment.DialogEnterRollNumberFragment
@@ -23,9 +26,6 @@ import com.pkk.android.attendance.interfaces.ChangeAttendanceStatusListener
 import com.pkk.android.attendance.interfaces.PayloadCallbackListener
 import com.pkk.android.attendance.misc.CentralVariables
 import com.pkk.android.attendance.misc.Utils
-import com.pkk.android.attendance.models.AttendanceDao
-import com.pkk.android.attendance.models.AttendanceDatabase
-import com.pkk.android.attendance.models.SessionDao
 import com.pkk.android.attendance.viewModels.TeacherViewModel
 import com.pkk.android.attendance.viewModels.ViewModelFactory
 
@@ -43,15 +43,15 @@ class TeacherFragment : Fragment(), View.OnClickListener, PayloadCallbackListene
 
     private val requestPermissionLauncher =
         registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { permissions ->
+            var count = 0
             permissions.entries.forEach {
                 val isGranted = it.value
                 if (isGranted) {
-                    DialogAttendanceRangeFragment().show(
-                        childFragmentManager,
-                        DialogAttendanceRangeFragment.TAG
-                    )
+                    count++
                 }
             }
+            if(count == permissions.size)
+                openDialog()
         }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -83,7 +83,6 @@ class TeacherFragment : Fragment(), View.OnClickListener, PayloadCallbackListene
         }
     }
 
-
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -113,7 +112,8 @@ class TeacherFragment : Fragment(), View.OnClickListener, PayloadCallbackListene
     }
 
     private fun setRecyclerView() {
-        teacherAdapter = TeacherAdapter(requireContext(), viewModel.extractor.students, this)
+        teacherAdapter = TeacherAdapter(this)
+        teacherAdapter!!.submitList(viewModel.extractor.students)
         binding.recyclerView.adapter = teacherAdapter
         binding.recyclerView.layoutManager = GridLayoutManager(requireContext(), 2)
     }
@@ -125,7 +125,7 @@ class TeacherFragment : Fragment(), View.OnClickListener, PayloadCallbackListene
                     childFragmentManager,
                     DialogSaveAttendanceFragment.TAG
                 )
-            R.id.refresh -> teacherAdapter!!.notifyDataSetChanged()
+            R.id.refresh -> teacherAdapter!!.submitList(viewModel.extractor.students)
             R.id.addRollNumber -> DialogEnterRollNumberFragment().show(
                 childFragmentManager,
                 DialogEnterRollNumberFragment.TAG
@@ -153,7 +153,31 @@ class TeacherFragment : Fragment(), View.OnClickListener, PayloadCallbackListene
     }
 
     private fun requestPermission() {
-        requestPermissionLauncher.launch(arrayOf(Manifest.permission.ACCESS_FINE_LOCATION))
+        requestPermissionLauncher.launch(REQUIRED_PERMISSIONS)
+    }
+
+    private fun openDialog() {
+        when {
+            Utils.isHotspotOn(requireContext()) -> {
+                Utils.showShortToast(
+                    requireContext(),
+                    resources.getString(R.string.turn_off_hotspot)
+                )
+            }
+//            Utils.isWifiConnected(requireContext()) -> Utils.showShortToast(
+//                requireContext(),
+//                resources.getString(R.string.turn_off_wifi)
+//            )
+            Utils.isGPSLocationOff(requireContext()) -> {
+                Utils.showShortToast(requireContext(), "Please Turn on GPS Location")
+            }
+            else -> {
+                DialogAttendanceRangeFragment().show(
+                    childFragmentManager,
+                    DialogAttendanceRangeFragment.TAG
+                )
+            }
+        }
     }
 
     private fun addRollNumber(roll: Int) {
@@ -188,7 +212,7 @@ class TeacherFragment : Fragment(), View.OnClickListener, PayloadCallbackListene
         teacherAdapter!!.notifyItemChanged(index)
     }
 
-    fun stopAllProcesses() {
+    private fun stopAllProcesses() {
         advertiser?.stopAdvertising()
         teacherAdapter?.notifyItemRangeRemoved(0, viewModel.getSize())
     }
@@ -203,4 +227,14 @@ class TeacherFragment : Fragment(), View.OnClickListener, PayloadCallbackListene
         super.onDestroyView()
     }
 
+    companion object {
+        private val REQUIRED_PERMISSIONS = arrayOf(
+            Manifest.permission.BLUETOOTH,
+            Manifest.permission.BLUETOOTH_ADMIN,
+            Manifest.permission.ACCESS_WIFI_STATE,
+            Manifest.permission.CHANGE_WIFI_STATE,
+            Manifest.permission.ACCESS_COARSE_LOCATION,
+            Manifest.permission.ACCESS_FINE_LOCATION
+        )
+    }
 }

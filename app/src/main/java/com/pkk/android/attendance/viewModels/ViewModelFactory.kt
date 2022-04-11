@@ -2,9 +2,9 @@ package com.pkk.android.attendance.viewModels
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
-import com.pkk.android.attendance.models.AttendanceDao
-import com.pkk.android.attendance.models.ClassDao
-import com.pkk.android.attendance.models.SessionDao
+import com.pkk.android.attendance.database.AttendanceDao
+import com.pkk.android.attendance.database.ClassDao
+import com.pkk.android.attendance.database.SessionDao
 
 class ViewModelFactory(vararg params: Any) : ViewModelProvider.NewInstanceFactory() {
     private val param: Array<out Any> = params

@@ -52,5 +52,7 @@
     <string name="ok">OK</string>
     <string name="enter_roll_number">Enter Roll Number</string>
     <string name="icon_to_open_drawer">icon to open drawer</string>
+    <string name="turn_off_hotspot">Please Turn off Hotspot</string>
+    <string name="turn_off_wifi">Please Turn off Wifi</string>
 
 </resources>

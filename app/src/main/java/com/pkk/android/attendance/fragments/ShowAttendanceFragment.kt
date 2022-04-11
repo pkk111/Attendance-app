@@ -9,9 +9,8 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.GridLayoutManager
 import com.pkk.android.attendance.adapter.ShowAttendanceRecyclerViewAdapter
 import com.pkk.android.attendance.databinding.FragmentShowAttendanceBinding
-import com.pkk.android.attendance.misc.CentralVariables
-import com.pkk.android.attendance.models.AttendanceDao
-import com.pkk.android.attendance.models.AttendanceDatabase
+import com.pkk.android.attendance.database.AttendanceDao
+import com.pkk.android.attendance.database.AttendanceDatabase
 import com.pkk.android.attendance.models.StudentModel
 import com.pkk.android.attendance.viewModels.ShowAttendanceViewModel
 import com.pkk.android.attendance.viewModels.ViewModelFactory
@@ -27,19 +26,15 @@ class ShowAttendanceFragment : Fragment() {
     private var columnCount = 4
     private var sessionId = -1L
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-
-        arguments?.let {
-            sessionId = it.getLong(CentralVariables.KEY_ID)
-        }
-    }
-
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
         _binding = FragmentShowAttendanceBinding.inflate(inflater, container, false)
+
+        val arguments = ShowAttendanceFragmentArgs.fromBundle(requireArguments())
+        sessionId = arguments.sessionId
+
         table = AttendanceDatabase.getDatabase(requireContext()).attendanceDao()
         viewModelFactory = ViewModelFactory(table, sessionId)
         viewModel =
@@ -53,11 +48,8 @@ class ShowAttendanceFragment : Fragment() {
     }
 
     private fun updateUI(list: List<StudentModel>) {
-        if (list.isEmpty())
-//            binding.fragmentMeetingTextView.visibility = View.VISIBLE
-        else {
-//            binding.fragmentMeetingTextView.visibility = View.GONE
-            adapter = ShowAttendanceRecyclerViewAdapter(requireContext(), list)
+        if (list.isNotEmpty()) {
+            adapter = ShowAttendanceRecyclerViewAdapter(list)
             binding.list.adapter = adapter
         }
     }

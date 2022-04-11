@@ -1,6 +1,7 @@
-package com.pkk.android.attendance.models
+package com.pkk.android.attendance.database
 
 import androidx.room.*
+import com.pkk.android.attendance.models.SessionModel
 
 @Dao
 interface SessionDao {
@@ -15,5 +16,5 @@ interface SessionDao {
     suspend fun update(sessionModel: SessionModel)
 
     @Query("SELECT * FROM sessions_table WHERE classes = :id")
-    suspend fun getAllByMeetingId(id: Long): List<SessionModel>
+    suspend fun getAllByMeetingId(id: Long): MutableList<SessionModel>
 }

@@ -35,13 +35,10 @@
             android:id="@+id/action_studentFragment_to_pulseLayoutFragment"
             app:destination="@id/pulseLayoutFragment"
             app:enterAnim="@anim/slide_in_from_top_left"
-            app:popExitAnim="@anim/slide_out_to_top_left">
-            <argument
-                android:name="message"
-                android:defaultValue=""
-                app:argType="string"
-                app:nullable="false" />
-        </action>
+            app:popExitAnim="@anim/slide_out_to_top_left"/>
+        <action
+            android:id="@+id/action_studentFragment_to_dialogEnterRollNumberFragment"
+            app:destination="@id/dialogEnterRollNumberFragment" />
     </fragment>
     <fragment
         android:id="@+id/teacherFragment"
@@ -67,21 +64,38 @@
     <fragment
         android:id="@+id/pulseLayoutFragment"
         android:name="com.pkk.android.attendance.fragments.PulseLayoutFragment"
-        tools:layout="@layout/fragment_pulse_layout" />
+        tools:layout="@layout/fragment_pulse_layout">
+
+        <argument
+            android:name="message"
+            app:argType="string" />
+    </fragment>
     <fragment
         android:id="@+id/sessionsFragment"
         android:name="com.pkk.android.attendance.fragments.SessionsFragment"
         android:label="Sessions"
         tools:layout="@layout/fragment_session">
+        <argument
+            android:name="meetingId"
+            app:argType="long" />
         <action
             android:id="@+id/action_sessionsFragment_to_showAttendanceFragment"
             app:destination="@id/showAttendanceFragment"
             app:enterAnim="@anim/slide_in_from_right"
             app:popExitAnim="@anim/slide_out_to_right" />
+
     </fragment>
     <fragment
         android:id="@+id/showAttendanceFragment"
         android:name="com.pkk.android.attendance.fragments.ShowAttendanceFragment"
         android:label="Attendance"
-        tools:layout="@layout/fragment_show_attendance" />
+        tools:layout="@layout/fragment_show_attendance">
+        <argument
+            android:name="sessionId"
+            app:argType="long" />
+    </fragment>
+    <dialog
+        android:id="@+id/dialogEnterRollNumberFragment"
+        android:name="com.pkk.android.attendance.dialogFragment.DialogEnterRollNumberFragment"
+        android:label="DialogEnterRollNumberFragment" />
 </navigation>

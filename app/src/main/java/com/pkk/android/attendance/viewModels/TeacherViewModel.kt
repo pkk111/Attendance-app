@@ -7,9 +7,9 @@ import androidx.lifecycle.viewModelScope
 import com.pkk.android.attendance.misc.AttendanceMarker
 import com.pkk.android.attendance.misc.MessageExtractor
 import com.pkk.android.attendance.misc.Utils
-import com.pkk.android.attendance.models.AttendanceDao
+import com.pkk.android.attendance.database.AttendanceDao
 import com.pkk.android.attendance.models.DeviceModel
-import com.pkk.android.attendance.models.SessionDao
+import com.pkk.android.attendance.database.SessionDao
 import com.pkk.android.attendance.models.SessionModel
 import kotlinx.coroutines.launch
 import java.util.*

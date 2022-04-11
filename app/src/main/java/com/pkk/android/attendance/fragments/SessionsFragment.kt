@@ -5,7 +5,6 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.PopupMenu
-import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.NavHostFragment
@@ -14,8 +13,8 @@ import com.pkk.android.attendance.R
 import com.pkk.android.attendance.adapter.SessionRecyclerViewAdapter
 import com.pkk.android.attendance.databinding.FragmentSessionBinding
 import com.pkk.android.attendance.misc.CentralVariables
-import com.pkk.android.attendance.models.AttendanceDatabase
-import com.pkk.android.attendance.models.SessionDao
+import com.pkk.android.attendance.database.AttendanceDatabase
+import com.pkk.android.attendance.database.SessionDao
 import com.pkk.android.attendance.models.SessionModel
 import com.pkk.android.attendance.viewModels.SessionsViewModel
 import com.pkk.android.attendance.viewModels.ViewModelFactory
@@ -32,8 +31,11 @@ class SessionsFragment : Fragment() {
     private var meetingId: Long = -1L
     private val onClickListener = View.OnClickListener { v ->
         NavHostFragment.findNavController(this).navigate(
-            R.id.action_sessionsFragment_to_showAttendanceFragment,
-            bundleOf(CentralVariables.KEY_ID to v.getTag(CentralVariables.KEY_SESSION_ID))
+            SessionsFragmentDirections.actionSessionsFragmentToShowAttendanceFragment(
+                v.getTag(
+                    CentralVariables.KEY_SESSION_ID
+                ) as Long
+            )
         )
     }
     private val menuListener = View.OnClickListener {
@@ -45,7 +47,7 @@ class SessionsFragment : Fragment() {
                 R.id.item_share -> {
                 }
                 R.id.item_delete -> {
-                    binding.sessionList.adapter!!.notifyItemRemoved(position)
+                    viewModel.deleteItemAt(position)
                 }
             }
             true
@@ -53,19 +55,14 @@ class SessionsFragment : Fragment() {
         menu.show()
     }
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-
-        arguments?.let {
-            meetingId = it.getLong(CentralVariables.KEY_ID)
-        }
-    }
-
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
         _binding = FragmentSessionBinding.inflate(inflater, container, false)
+
+        val arguments = SessionsFragmentArgs.fromBundle(requireArguments())
+        meetingId = arguments.meetingId
 
         table = AttendanceDatabase.getDatabase(requireContext()).sessionDao()
         viewModelFactory = ViewModelFactory(table)
@@ -80,12 +77,16 @@ class SessionsFragment : Fragment() {
     }
 
     private fun updateUI(list: List<SessionModel>) {
-        if (list.isEmpty())
-            binding.fragmentMeetingTextView.visibility = View.VISIBLE
-        else {
-            binding.fragmentMeetingTextView.visibility = View.GONE
-            adapter = SessionRecyclerViewAdapter(list, onClickListener, menuListener)
-            binding.sessionList.adapter = adapter
+        if (viewModel.positionRemoved != -1) {
+            if (list.isEmpty())
+                binding.fragmentMeetingTextView.visibility = View.VISIBLE
+            else {
+                binding.fragmentMeetingTextView.visibility = View.GONE
+                adapter = SessionRecyclerViewAdapter(list, onClickListener, menuListener)
+                binding.sessionList.adapter = adapter
+            }
+        } else {
+            binding.sessionList.adapter!!.notifyItemRemoved(viewModel.positionRemoved)
         }
     }
 }

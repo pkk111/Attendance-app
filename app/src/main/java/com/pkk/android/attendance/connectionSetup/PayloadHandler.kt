@@ -15,7 +15,7 @@ import java.io.InputStream
 
 class PayloadHandler(private val context: Context) {
 
-    class ReceiveWithProgressCallback(private val context: Context) : PayloadCallback() {
+    class ReceiveWithProgressCallback(private val context: Context, private val listeners: PayloadCallbackListener) : PayloadCallback() {
         private val incomingPayloads = SimpleArrayMap<Long, NotificationCompat.Builder>()
         private val outgoingPayloads = SimpleArrayMap<Long, NotificationCompat.Builder>()
         var notificationManager =

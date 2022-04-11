@@ -1,23 +1,21 @@
 package com.pkk.android.attendance.fragments
 
 import android.Manifest
+import android.content.pm.PackageManager
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.os.bundleOf
+import androidx.core.app.ActivityCompat
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.NavHostFragment
 import com.google.gson.Gson
-import com.google.gson.GsonBuilder
 import com.pkk.android.attendance.R
 import com.pkk.android.attendance.databinding.FragmentStudentBinding
-import com.pkk.android.attendance.dialogFragment.DialogEnterRollNumberFragment
 import com.pkk.android.attendance.misc.CentralVariables
 import com.pkk.android.attendance.misc.Utils
 import com.pkk.android.attendance.models.MessageCodes
@@ -34,7 +32,7 @@ class StudentFragment : Fragment() {
     private var _binding: FragmentStudentBinding? = null
     private val binding get() = _binding!!
     private lateinit var gson: Gson
-    private var message: String? = null
+    private lateinit var message: String
     private lateinit var viewModelFactory: ViewModelFactory
     private lateinit var viewModel: StudentViewModel
 
@@ -80,15 +78,15 @@ class StudentFragment : Fragment() {
     }
 
     private fun initialise() {
-        gson = GsonBuilder().enableComplexMapKeySerialization().create()
+        gson = Gson()
 
         binding.toolbar.setNavigationOnClickListener { closeCurrentFragment() }
         binding.attendanceStatus.setOnClickListener {
-
-            DialogEnterRollNumberFragment().show(
-                childFragmentManager,
-                DialogEnterRollNumberFragment.TAG
-            )
+            NavHostFragment.findNavController(this).navigate(StudentFragmentDirections.actionStudentFragmentToDialogEnterRollNumberFragment())
+//            DialogEnterRollNumberFragment().show(
+//                childFragmentManager,
+//                DialogEnterRollNumberFragment.TAG
+//            )
         }
         binding.buttonSend.setOnClickListener {
             val m =
@@ -97,7 +95,6 @@ class StudentFragment : Fragment() {
                     binding.sendMessageEditText.text.toString()
                 )
             message = gson.toJson(m)
-            Log.d("json = ", message!!)
             requestPermission()
         }
     }
@@ -112,15 +109,37 @@ class StudentFragment : Fragment() {
     }
 
     private fun requestPermission() {
-        requestPermissionLauncher.launch(arrayOf(Manifest.permission.ACCESS_FINE_LOCATION))
+        val perms = MutableList(0) { "" }
+        for (permission in REQUIRED_PERMISSIONS)
+            if (ActivityCompat.checkSelfPermission(
+                    requireContext(),
+                    permission
+                ) == PackageManager.PERMISSION_DENIED && !shouldShowRequestPermissionRationale(
+                    permission
+                )
+            )
+                perms.add(permission)
+
+        requestPermissionLauncher.launch(REQUIRED_PERMISSIONS)
     }
 
     private fun openFragment() {
-        NavHostFragment.findNavController(this).navigate(
-            R.id.action_studentFragment_to_pulseLayoutFragment, bundleOf(
-                CentralVariables.KEY_MESSAGE to message
-            )
-            )
+        when {
+            Utils.isHotspotOn(requireContext()) -> {
+                Utils.showShortToast(requireContext(), "Turn off Hotspot")
+            }
+//            Utils.isWifiConnected(requireContext()) -> Utils.showShortToast(
+//                requireContext(), "Please Turn off Wifi"
+//            )
+            Utils.isGPSLocationOff(requireContext()) -> {
+                Utils.showShortToast(requireContext(), "Please Turn on GPS Location")
+            }
+            else -> {
+                NavHostFragment.findNavController(this).navigate(
+                    StudentFragmentDirections.actionStudentFragmentToPulseLayoutFragment(message)
+                )
+            }
+        }
     }
 
     private fun updateUI(message: String?) {
@@ -153,13 +172,24 @@ class StudentFragment : Fragment() {
     }
 
     companion object {
+        private val REQUIRED_PERMISSIONS = arrayOf(
+            Manifest.permission.BLUETOOTH,
+            Manifest.permission.BLUETOOTH_ADMIN,
+            Manifest.permission.ACCESS_WIFI_STATE,
+            Manifest.permission.CHANGE_WIFI_STATE,
+            Manifest.permission.ACCESS_COARSE_LOCATION,
+            Manifest.permission.ACCESS_FINE_LOCATION,
+            Manifest.permission.ACCESS_NETWORK_STATE,
+            Manifest.permission.INTERNET
+        )
+
         val localIpAddress: String?
             get() {
                 try {
-                    val en = Collections.list(NetworkInterface.getNetworkInterfaces())
-                    for (intf in en) {
-                        val enumIpAddr = intf.inetAddresses
-                        for (inetAddress in enumIpAddr) {
+                    val interfaceList = Collections.list(NetworkInterface.getNetworkInterfaces())
+                    for (netWorkInterface in interfaceList) {
+                        val enumIpAddress = netWorkInterface.inetAddresses
+                        for (inetAddress in enumIpAddress) {
                             if (!inetAddress.isLoopbackAddress && inetAddress is Inet6Address) {
                                 return inetAddress.getHostAddress()
                             }

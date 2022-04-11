@@ -4,7 +4,7 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.pkk.android.attendance.models.AttendanceDao
+import com.pkk.android.attendance.database.AttendanceDao
 import com.pkk.android.attendance.models.StudentModel
 import kotlinx.coroutines.launch
 

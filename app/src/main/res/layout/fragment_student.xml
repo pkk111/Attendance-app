@@ -4,6 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools">
 
     <data>
+
         <variable
             name="studentViewModel"
             type="com.pkk.android.attendance.viewModels.StudentViewModel" />
@@ -72,7 +73,7 @@
                 android:id="@+id/reply_from_server_textview"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="@{studentViewModel.serverClientMessage}" />
+                android:text="@{ studentViewModel.serverClientMessage }" />
         </ScrollView>
 
         <TextView
@@ -85,11 +86,11 @@
             android:layout_marginLeft="10dp"
             android:layout_marginRight="10dp"
             android:background="@{studentViewModel.isPresent() ? @drawable/start_button_background :@drawable/stop_button_background}"
+            android:clickable="@{!studentViewModel.isPresent()}"
             android:gravity="center"
             android:text="@{studentViewModel.isPresent() ? @string/present_marked : @string/absent}"
             android:textSize="32sp"
             android:textStyle="bold"
-            android:clickable="@{!studentViewModel.isPresent()}"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintRight_toRightOf="parent"

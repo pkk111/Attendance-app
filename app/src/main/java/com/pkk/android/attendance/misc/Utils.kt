@@ -4,10 +4,14 @@ package com.pkk.android.attendance.misc
 import android.content.Context
 import android.content.res.Resources
 import android.graphics.drawable.Drawable
+import android.location.LocationManager
+import android.net.wifi.WifiManager
 import android.os.Build
 import android.util.TypedValue
 import android.widget.Toast
+import androidx.core.content.res.ResourcesCompat
 import com.pkk.android.attendance.R
+import java.lang.reflect.Method
 import kotlin.random.Random
 
 
@@ -41,11 +45,8 @@ class Utils {
             drawable: Int,
             theme: Resources.Theme? = null
         ): Drawable {
-            return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                context.resources.getDrawable(drawable, theme)
-            } else {
-                context.resources.getDrawable(drawable)
-            }
+            val rss = ResourcesCompat.getDrawable(context.resources, drawable, theme)
+            return rss ?: throw IllegalArgumentException("Drawable Resource not found")
         }
 
         fun Int.toDp(context: Context): Float {
@@ -79,6 +80,11 @@ class Utils {
             return ArrayList(
                 listOf(
                     R.drawable.background_1,
+                    R.drawable.background_2,
+                    R.drawable.background_3,
+                    R.drawable.background_4,
+                    R.drawable.background_5,
+                    R.drawable.background_6,
                 )
             )
         }
@@ -95,6 +101,27 @@ class Utils {
         fun getRandomBackground(): Int {
             val size = getBackgrounds().size
             return Random(System.nanoTime()).nextInt(size)
+        }
+
+        fun isHotspotOn(context: Context): Boolean {
+            val manager =
+                context.applicationContext.getSystemService(Context.WIFI_SERVICE) as WifiManager
+            val method: Method = manager.javaClass.getMethod("getWifiApState")
+            method.isAccessible = true
+            val invoke = method.invoke(manager) as Int
+            return invoke == 13 || invoke == 12
+        }
+
+        fun isWifiConnected(context: Context): Boolean {
+            val manager =
+                context.applicationContext.getSystemService(Context.WIFI_SERVICE) as WifiManager
+            return manager.isWifiEnabled
+        }
+
+        fun isGPSLocationOff(context: Context): Boolean {
+            val manager =
+                context.applicationContext.getSystemService(Context.LOCATION_SERVICE) as LocationManager
+            return !manager.isProviderEnabled(LocationManager.GPS_PROVIDER)
         }
     }
 }

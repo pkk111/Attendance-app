@@ -4,17 +4,15 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.NavHostFragment
 import androidx.recyclerview.widget.GridLayoutManager
-import com.pkk.android.attendance.R
 import com.pkk.android.attendance.adapter.MeetingRecyclerViewAdapter
 import com.pkk.android.attendance.databinding.FragmentMeetingsBinding
 import com.pkk.android.attendance.misc.CentralVariables
-import com.pkk.android.attendance.models.AttendanceDatabase
-import com.pkk.android.attendance.models.ClassDao
+import com.pkk.android.attendance.database.AttendanceDatabase
+import com.pkk.android.attendance.database.ClassDao
 import com.pkk.android.attendance.models.MeetingModel
 import com.pkk.android.attendance.viewModels.MeetingsViewModel
 import com.pkk.android.attendance.viewModels.ViewModelFactory
@@ -30,8 +28,7 @@ class MeetingsFragment : Fragment() {
 
     private val onClickListener = View.OnClickListener { v ->
         NavHostFragment.findNavController(this).navigate(
-            R.id.action_nav_meetings_to_sessionsFragment,
-            bundleOf(CentralVariables.KEY_ID to v.getTag(CentralVariables.KEY_SESSION_ID))
+            MeetingsFragmentDirections.actionNavMeetingsToSessionsFragment(v.getTag(CentralVariables.KEY_SESSION_ID) as Long)
         )
     }
 

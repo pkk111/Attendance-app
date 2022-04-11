@@ -34,12 +34,12 @@ class HomeFragment : Fragment() {
 
     private fun studentLogin() {
         NavHostFragment.findNavController(this)
-            .navigate(R.id.action_homeFragment_to_studentFragment)
+            .navigate(HomeFragmentDirections.actionHomeFragmentToStudentFragment())
     }
 
     private fun teacherLogin() {
         NavHostFragment.findNavController(this)
-            .navigate(R.id.action_homeFragment_to_teacherFragment)
+            .navigate(HomeFragmentDirections.actionHomeFragmentToTeacherFragment())
     }
 
     override fun onResume() {
