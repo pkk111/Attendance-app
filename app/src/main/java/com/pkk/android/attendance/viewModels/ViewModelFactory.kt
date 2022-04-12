@@ -9,7 +9,7 @@ import com.pkk.android.attendance.database.SessionDao
 class ViewModelFactory(vararg params: Any) : ViewModelProvider.NewInstanceFactory() {
     private val param: Array<out Any> = params
 
-    override fun <T : ViewModel?> create(modelClass: Class<T>): T {
+    override fun <T : ViewModel> create(modelClass: Class<T>): T {
         if (modelClass.isAssignableFrom(TeacherViewModel::class.java) && param.size == 2)
             return TeacherViewModel(param[0] as SessionDao, param[1] as AttendanceDao) as T
         if (modelClass.isAssignableFrom(PulseLayoutViewModel::class.java))

@@ -77,7 +77,7 @@ class SessionsFragment : Fragment() {
     }
 
     private fun updateUI(list: List<SessionModel>) {
-        if (viewModel.positionRemoved != -1) {
+        if (viewModel.positionRemoved == -1) {
             if (list.isEmpty())
                 binding.fragmentMeetingTextView.visibility = View.VISIBLE
             else {
